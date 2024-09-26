@@ -7,6 +7,7 @@ const connectDB = require('./config/db'); // Ensure this points to your DB conne
 const authRoutes = require('./routes/auth'); // Path to authentication routes
 const userRoutes = require('./routes/UserRoutes'); // Path to user-related routes
 const appointmentRoutes = require('./routes/appointments'); // Path to appointment routes
+const therapistRoutes = require('./routes/therapists'); // Ensure this points to the correct route file
 
 const app = express();
 
@@ -37,7 +38,7 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/myofunction
 app.use('/api/users', userRoutes); // Handle user-related requests
 app.use('/api/auth', authRoutes); // Handle authentication-related requests
 app.use('/api/appointments', appointmentRoutes); // Handle appointment-related requests
-
+app.use('/api/therapists', therapistRoutes); // Add the therapists route here
 // Basic root endpoint to confirm server is running
 app.get('/', (req, res) => {
     res.send('API is running...');
