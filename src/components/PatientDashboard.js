@@ -206,11 +206,15 @@ const PatientDashboard = ({ patientId }) => {
               onChange={(e) => setNewAppointment({ ...newAppointment, therapistId: e.target.value })}
               sx={{ mt: 2 }}
             >
-              {therapists.map((therapist) => (
-                <MenuItem key={therapist.id} value={therapist.id}>
-                  {therapist.name}
-                </MenuItem>
-              ))}
+              {therapists.length > 0 ? (
+                therapists.map((therapist) => (
+                  <MenuItem key={therapist._id} value={therapist._id}>
+                    {therapist.name}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>No therapists available</MenuItem>
+              )}
             </TextField>
             {error && <Typography color="error" sx={{ mt: 1 }}>{error}</Typography>}
           </DialogContent>

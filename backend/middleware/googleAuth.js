@@ -6,13 +6,14 @@ const OAuth2 = google.auth.OAuth2;
 const oauth2Client = new OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  'http://localhost:5000/api/auth/google/callback' // Adjust this based on your deployment URL
+  process.env.GOOGLE_REDIRECT_URI || 'http://localhost:5000/api/auth/google/callback' // Adjust this based on your deployment URL
 );
 
 // Generate a URL for Google authentication
 const getGoogleAuthURL = () => {
   return oauth2Client.generateAuthUrl({
     access_type: 'offline',
+    prompt: 'consent',
     scope: ['https://www.googleapis.com/auth/calendar'],
   });
 };

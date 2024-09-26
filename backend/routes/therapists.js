@@ -17,6 +17,20 @@ router.get('/', auth, roleCheck('admin'), async (req, res) => {
     }
   });
 
+// Fetch all therapists with role 'therapist'
+router.get('/', auth, roleCheck('admin'), async (req, res) => {
+    try {
+        const therapists = await User.find({ role: 'therapist' }); // Adjust based on your model
+        if (therapists.length === 0) {
+            return res.status(404).json({ message: 'No therapists found' });
+        }
+        res.status(200).json(therapists);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch therapists' });
+    }
+});
+
+
 // Additional route (if needed) to fetch all therapists without admin restriction
 // This route is purely for reference and should be secured in production environments.
 router.get('/all', auth, async (req, res) => {

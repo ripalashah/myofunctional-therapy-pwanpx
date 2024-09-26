@@ -4,6 +4,45 @@ const router = express.Router();
 const User = require('../models/User'); // Adjust path if needed
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { getGoogleAuthURL, getGoogleAccessToken } = require('../middleware/googleAuth');
+const { createGoogleCalendarEvent, listGoogleCalendarEvents } = require('../services/googleCalendar');
+
+// Route to get Google Authentication URL
+router.get('/google', (req, res) => {
+  const authURL = getGoogleAuthURL();
+  res.redirect(authURL);
+});
+
+// Callback route after Google authentication
+router.get('/google/callback', async (req, res) => {
+  const { code } = req.query;
+  try {
+    const tokens = await getGoogleAccessToken(code);
+    res.status(200).json({ message: 'Google authentication successful', tokens });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to authenticate with Google' });
+  }
+});
+
+// Route to create a calendar event
+router.post('/calendar/create', async (req, res) => {
+  try {
+    const event = await createGoogleCalendarEvent(req.body);
+    res.status(200).json({ message: 'Event created successfully', event });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create calendar event' });
+  }
+});
+
+// Route to list calendar events
+router.get('/calendar/list', async (req, res) => {
+  try {
+    const events = await listGoogleCalendarEvents();
+    res.status(200).json(events);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to list calendar events' });
+  }
+});
 
 // Register a new user
 router.post('/register', async (req, res) => {
