@@ -1,81 +1,115 @@
 // src/components/Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import Layout from './Layout'; // Import Layout component
+import { Container, TextField, Button, Typography, Box, Paper } from '@mui/material'; // Import MUI components
 
 const Login = () => {
-    const [formData, setFormData] = useState({ email: '', password: '' });
-    const [error, setError] = useState(''); // State for error messages
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-    // Handle input changes
-    const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  // Handle input changes
+  const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    // Handle form submission
-    const onSubmit = async (e) => {
-        e.preventDefault();
-        setError(''); // Clear any previous error messages
+  // Handle form submission
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    const url = 'http://localhost:5000/api/auth/login';
 
-        // URL validation and error logging
-        const url = 'http://localhost:5000/api/auth/login';
+    try {
+      // Make the POST request to the login endpoint
+      const res = await axios.post(url, formData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-        try {
-            // Check if the backend URL is reachable before making the request
-            console.log('Attempting to connect to:', url);
+      // Store the token and role upon successful login
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('role', res.data.role);
 
-            // Make the POST request to the login endpoint
-            const res = await axios.post(url, formData);
+      alert('Login successful');
 
-            // Store the token in localStorage upon successful login
-            localStorage.setItem('token', res.data.token);
-            alert('Login successful');
-        } catch (error) {
-            // Log the error details to the console for debugging
-            console.error('Login failed:', error);
+      // Redirect based on user role
+      switch (res.data.role) {
+        case 'patient':
+          navigate('/patient');
+          break;
+        case 'therapist':
+          navigate('/therapist');
+          break;
+        case 'referral-source':
+          navigate('/referral-dashboard');
+          break;
+        default:
+          navigate('/'); // Default redirect
+          break;
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
 
-            // Check if the error is related to a network issue
-            if (error.response) {
-                // Errors with response status codes
-                if (error.response.status === 404) {
-                    setError('The login endpoint was not found. Please check the URL or server configuration.');
-                } else if (error.response.status === 400) {
-                    setError('Invalid credentials. Please check your email and password.');
-                } else {
-                    setError('An error occurred. Please try again later.');
-                }
-            } else if (error.request) {
-                // Errors with the request (e.g., server not responding)
-                setError('Unable to connect to the server. Please ensure the backend is running.');
-            } else {
-                // Other errors (e.g., invalid setup)
-                setError('An unexpected error occurred.');
-            }
+      // Handle errors appropriately
+      if (error.response) {
+        if (error.response.status === 404) {
+          setError('The login endpoint was not found. Please check the URL or server configuration.');
+        } else if (error.response.status === 400) {
+          setError('Invalid credentials. Please check your email and password.');
+        } else {
+          setError('An error occurred. Please try again later.');
         }
-    };
+      } else if (error.request) {
+        setError('Unable to connect to the server. Please ensure the backend is running.');
+      } else {
+        setError('An unexpected error occurred.');
+      }
+    }
+  };
 
-    return (
-        <div>
-            <form onSubmit={onSubmit}>
-                <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={onChange}
-                    placeholder="Email"
-                    required
-                />
-                <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={onChange}
-                    placeholder="Password"
-                    required
-                />
-                <button type="submit">Login</button>
-            </form>
-            {/* Display error messages if any */}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-        </div>
-    );
+  return (
+    <Layout>
+      <Container maxWidth="sm">
+        <Paper elevation={3} sx={{ padding: 4, marginTop: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            Login
+          </Typography>
+
+          <Box component="form" onSubmit={onSubmit} sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              type="email"
+              name="email"
+              label="Email"
+              variant="outlined"
+              value={formData.email}
+              onChange={onChange}
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              type="password"
+              name="password"
+              label="Password"
+              variant="outlined"
+              value={formData.password}
+              onChange={onChange}
+              margin="normal"
+              required
+            />
+            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+              Login
+            </Button>
+          </Box>
+
+          {/* Display error messages if any */}
+          {error && <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>}
+        </Paper>
+      </Container>
+    </Layout>
+  );
 };
 
 export default Login;

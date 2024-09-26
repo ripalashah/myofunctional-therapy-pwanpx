@@ -57,7 +57,7 @@ const Register = () => {
       <select name="role" value={formData.role} onChange={handleChange}>
         <option value="patient">Patient</option>
         <option value="therapist">Therapist</option>
-        <option value="referral">Referral Source</option>
+        <option value="referral-source">Referral Source</option>
       </select>
       <button type="submit">Register</button>
     </form>

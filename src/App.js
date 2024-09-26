@@ -8,12 +8,17 @@ import AppointmentManagement from './components/AppointmentManagement';
 import Payment from './components/Payment';
 import ProgressTracking from './components/ProgressTracking';
 import MedicalHistoryForm from './components/MedicalHistoryForm';
-import ProtectedRoute from './components/ProtectedRoute'; // Example of role-based protected routing
+import ProtectedRoute from './components/ProtectedRoute';
+import ReferralDashboard from './components/ReferralDashboard';
+// Import HomePage if needed; if it doesn't exist, create or remove this line
+// import HomePage from './components/HomePage';
 
 function App() {
   return (
-    <Router>
+    <Router basename="/wmt">
       <Routes>
+        {/* Uncomment the HomePage route only if HomePage is defined */}
+        
         <Route path="/" element={<Navigate to="/login" />} /> {/* Redirect root to login */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -23,6 +28,7 @@ function App() {
         <Route path="/payment" element={<ProtectedRoute role="patient" component={Payment} />} />
         <Route path="/progress" element={<ProtectedRoute role="patient" component={ProgressTracking} />} />
         <Route path="/medical-history" element={<ProtectedRoute role="patient" component={MedicalHistoryForm} />} />
+        <Route path="/referral-dashboard" element={<ProtectedRoute role="referral-source" component={ReferralDashboard} />} />
         {/* Add additional routes as necessary */}
       </Routes>
     </Router>

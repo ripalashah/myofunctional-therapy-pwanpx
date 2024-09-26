@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Layout from './Layout';
 
 const AppointmentManagement = () => {
   const [appointments, setAppointments] = useState([]);
@@ -20,14 +21,14 @@ const AppointmentManagement = () => {
   }, []);
 
   return (
-    <div>
+    <Layout>
       <h2>Manage Appointments</h2>
       {appointments.map((appointment) => (
         <div key={appointment._id}>
           <p>{appointment.date} - {appointment.status}</p>
         </div>
       ))}
-    </div>
+    </Layout>
   );
 };
 

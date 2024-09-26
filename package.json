@@ -2,7 +2,11 @@
   "name": "myofunctional-therapy-pwanpx",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
+  "homepage": "/wmt",
+    "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/material": "^6.1.1",
     "@stripe/react-stripe-js": "^2.8.0",
     "@stripe/stripe-js": "^4.5.0",
     "@testing-library/jest-dom": "^5.17.0",
