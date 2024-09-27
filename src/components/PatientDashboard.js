@@ -37,6 +37,7 @@ const PatientDashboard = ({ patientId }) => {
       setTherapists(response.data);
     } catch (error) {
       console.error('Error fetching therapists:', error);
+      setError('Failed to fetch therapists. Please try again.');
     }
   }, []);
 
@@ -52,6 +53,7 @@ const PatientDashboard = ({ patientId }) => {
     } catch (error) {
       setLoading(false);
       console.error('Error fetching appointments:', error);
+      setError('Failed to fetch appointments. Please try again.');
     }
   }, [patientId]);
 
@@ -106,6 +108,7 @@ const PatientDashboard = ({ patientId }) => {
     } catch (error) {
       setLoading(false);
       console.error('Error canceling appointment:', error);
+      setError('Failed to cancel the appointment. Please try again.');
     }
   };
 
@@ -147,7 +150,7 @@ const PatientDashboard = ({ patientId }) => {
                         Date: {new Date(appt.date).toLocaleDateString()}
                       </Typography>
                       <Typography color="textSecondary">Time: {appt.time}</Typography>
-                      <Typography color="textSecondary">With Therapist: {appt.therapistId}</Typography>
+                      <Typography color="textSecondary">With Therapist: {appt.therapistName}</Typography>
                       <Button
                         variant="outlined"
                         color="secondary"

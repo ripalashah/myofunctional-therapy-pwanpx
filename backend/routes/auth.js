@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User'); // Adjust path if needed
+const Therapist = require('../models/Therapist'); // Correctly import the Therapist model
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { getGoogleAuthURL, getGoogleAccessToken } = require('../middleware/googleAuth');
@@ -60,14 +61,34 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ msg: 'User already exists' });
     }
 
-     // Hash the password before saving
-     const salt = await bcrypt.genSalt(10);
-     const hashedPassword = await bcrypt.hash(password, salt);
-
     // Create a new user
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash password
     const newUser = new User({ name, email, password: hashedPassword, role });
     await newUser.save();
-    res.status(201).json({ msg: 'User registered successfully' });
+
+    // If the user role is 'therapist', create a corresponding Therapist document
+    if (role === 'therapist') {
+      // Check if the email is valid to avoid duplicates
+      const existingTherapist = await Therapist.findOne({ email });
+      if (existingTherapist) {
+        return res.status(400).json({ msg: 'Therapist with this email already exists' });
+      }
+
+      // Create a new therapist document linked to the user
+      const newTherapist = new Therapist({
+        user: newUser._id,
+        specialty: req.body.specialty || 'Default Specialty', // Optional default
+        availability: req.body.availability || [{ day: 'Monday', startTime: '09:00', endTime: '17:00' }], // Default availability
+      });
+
+      // Save the therapist document and update the user reference
+      await newTherapist.save();
+      newUser.therapist = newTherapist._id;
+      await newUser.save();
+    }
+
+    // Return a success message along with the user data
+    res.status(201).json({ msg: 'User registered successfully', user: newUser });
   } catch (err) {
     console.error('Error registering user:', err.message);
     res.status(500).send('Server error');
