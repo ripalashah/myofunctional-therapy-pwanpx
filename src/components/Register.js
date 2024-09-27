@@ -1,13 +1,31 @@
+// src/components/Register.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from '@mui/material';
 
 const Register = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'patient' });
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'patient',
+  });
   const navigate = useNavigate(); // React Router hook for navigation
 
   // Handle input changes
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   // Handle registration submission
   const handleRegister = async (e) => {
@@ -17,7 +35,10 @@ const Register = () => {
 
     try {
       // Make sure the URL points to your running backend server
-      const response = await axios.post('http://localhost:5000/api/auth/register', formData);
+      const response = await axios.post(
+        'http://localhost:5000/api/auth/register',
+        formData
+      );
       console.log('Registration response:', response.data); // Debugging log to verify the response
 
       alert('Registration successful. Please login.');
@@ -29,38 +50,88 @@ const Register = () => {
   };
 
   return (
-    <form onSubmit={handleRegister}>
-      <input
-        type="text"
-        name="name"
-        value={formData.name}
-        onChange={handleChange}
-        placeholder="Name"
-        required
-      />
-      <input
-        type="email"
-        name="email"
-        value={formData.email}
-        onChange={handleChange}
-        placeholder="Email"
-        required
-      />
-      <input
-        type="password"
-        name="password"
-        value={formData.password}
-        onChange={handleChange}
-        placeholder="Password"
-        required
-      />
-      <select name="role" value={formData.role} onChange={handleChange}>
-        <option value="patient">Patient</option>
-        <option value="therapist">Therapist</option>
-        <option value="referral-source">Referral Source</option>
-      </select>
-      <button type="submit">Register</button>
-    </form>
+    <Container maxWidth="sm">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h5" gutterBottom>
+          Register
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={handleRegister}
+          sx={{ mt: 3, width: '100%' }}
+        >
+          <TextField
+            fullWidth
+            variant="outlined"
+            margin="normal"
+            required
+            id="name"
+            label="Name"
+            name="name"
+            autoComplete="name"
+            autoFocus
+            value={formData.name}
+            onChange={handleChange}
+          />
+          <TextField
+            fullWidth
+            variant="outlined"
+            margin="normal"
+            required
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          <TextField
+            fullWidth
+            variant="outlined"
+            margin="normal"
+            required
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+          <FormControl fullWidth variant="outlined" margin="normal">
+            <InputLabel id="role-label">Select Role</InputLabel>
+            <Select
+              labelId="role-label"
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              label="Select Role"
+            >
+              <MenuItem value="patient">Patient</MenuItem>
+              <MenuItem value="therapist">Therapist</MenuItem>
+              <MenuItem value="referral-source">Referral Source</MenuItem>
+            </Select>
+          </FormControl>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2, mb: 2 }}
+          >
+            Register
+          </Button>
+        </Box>
+      </Box>
+    </Container>
   );
 };
 
