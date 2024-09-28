@@ -1,5 +1,6 @@
 // src/components/PatientDashboard.js
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext'; // Adjust path to your AuthContext
 import axios from 'axios';
 import Layout from './Layout';
 import ProgressChart from './ProgressChart'; // Ensure this is correctly imported
@@ -27,17 +28,39 @@ const PatientDashboard = ({ patientId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [therapists, setTherapists] = useState([]);
+  const { user } = useContext(AuthContext); // Fetch user from the context
+  const [selectedTherapist, setSelectedTherapist] = useState(null); // State to handle the selected therapist
 
   // Fetch available therapists
   const fetchTherapists = useCallback(async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authorization token is missing. Please log in again.');
+        return;
+      }
+
+      // Attempt to fetch therapists with the token
       const response = await axios.get('http://localhost:5000/api/therapists', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setTherapists(response.data);
+
+      // Check if the response contains therapists
+      if (response.status === 200) {
+        setTherapists(response.data);
+      } else {
+        setError('Unexpected response status. Please try again.');
+      }
     } catch (error) {
       console.error('Error fetching therapists:', error);
-      setError('Failed to fetch therapists. Please try again.');
+
+      if (error.response) {
+        setError(`Failed to fetch therapists: ${error.response.data.message || 'Please try again.'}`);
+      } else if (error.request) {
+        setError('No response from the server. Please check your connection and try again.');
+      } else {
+        setError('Error setting up the request. Please try again.');
+      }
     }
   }, []);
 
@@ -77,8 +100,11 @@ const PatientDashboard = ({ patientId }) => {
       await axios.post(
         'http://localhost:5000/api/appointments/book',
         {
-          ...newAppointment,
-          patientId,
+          therapistId,
+          date,
+          time,
+          patientEmail: user.email, // Assuming user is fetched from context or state
+          therapistEmail: selectedTherapist?.email, // Fetch from selected therapist details
         },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -206,7 +232,11 @@ const PatientDashboard = ({ patientId }) => {
               select
               label="Select Therapist"
               value={newAppointment.therapistId}
-              onChange={(e) => setNewAppointment({ ...newAppointment, therapistId: e.target.value })}
+              onChange={(e) => {
+                setNewAppointment({ ...newAppointment, therapistId: e.target.value });
+                const therapist = therapists.find(t => t._id === e.target.value); // Assuming therapists array is available
+                setSelectedTherapist(therapist);
+              }}
               sx={{ mt: 2 }}
             >
               {therapists.length > 0 ? (

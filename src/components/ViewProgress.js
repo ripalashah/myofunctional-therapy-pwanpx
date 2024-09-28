@@ -8,30 +8,37 @@ import {
   CardContent,
   Grid,
   Box,
-} from '@mui/material'; // Importing MUI components
+  CircularProgress,
+} from '@mui/material';
 
 const ViewProgress = ({ patientId }) => {
   const [progressLogs, setProgressLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Use useCallback to memoize fetchProgressLogs
   const fetchProgressLogs = useCallback(async () => {
     try {
+      setLoading(true);
       const res = await axios.get(
-        `http://localhost:5000/api/progress/progress-log/${patientId}`,
+        `http://localhost:5000/api/progress/progress-logs/${patientId}`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }, // Ensure a valid token is stored in localStorage
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         }
       );
-      setProgressLogs(res.data); // Update state with fetched progress logs
+      setProgressLogs(res.data);
     } catch (error) {
       console.error('Error fetching progress logs:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [patientId]); // Include patientId as a dependency since it is used inside the function
+  }, [patientId]);
 
-  // useEffect to call fetchProgressLogs when patientId changes or fetchProgressLogs is updated
   useEffect(() => {
     fetchProgressLogs();
-  }, [fetchProgressLogs]); // fetchProgressLogs is now stable because of useCallback
+  }, [fetchProgressLogs]);
+
+  if (loading) {
+    return <CircularProgress />;
+  }
 
   return (
     <Container maxWidth="md">

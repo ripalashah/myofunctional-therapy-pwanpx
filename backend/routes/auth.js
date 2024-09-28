@@ -61,14 +61,16 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ msg: 'User already exists' });
     }
 
-    // Create a new user
-    const hashedPassword = await bcrypt.hash(password, 10); // Hash password
-    const newUser = new User({ name, email, password: hashedPassword, role });
+    // Create a new user with hashed password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ name, email, password, role });
+
+    // Save the user document
     await newUser.save();
 
-    // If the user role is 'therapist', create a corresponding Therapist document
+    // If the role is 'therapist', create the corresponding therapist document
     if (role === 'therapist') {
-      // Check if the email is valid to avoid duplicates
+      // Check if a therapist with the same email already exists
       const existingTherapist = await Therapist.findOne({ email });
       if (existingTherapist) {
         return res.status(400).json({ msg: 'Therapist with this email already exists' });
@@ -76,22 +78,25 @@ router.post('/register', async (req, res) => {
 
       // Create a new therapist document linked to the user
       const newTherapist = new Therapist({
-        user: newUser._id,
-        specialty: req.body.specialty || 'Default Specialty', // Optional default
-        availability: req.body.availability || [{ day: 'Monday', startTime: '09:00', endTime: '17:00' }], // Default availability
+        user: newUser._id, // Link to the user ID
+        email: newUser.email, // Set email from the newly created user
+        specialty: 'Default Specialty', // Set default values or allow customization during registration
+        availability: [{ day: 'Monday', startTime: '9:00 AM', endTime: '5:00 PM' }], // Example availability
       });
 
-      // Save the therapist document and update the user reference
+      // Save the therapist document
       await newTherapist.save();
+
+      // Update the user to reference the therapist
       newUser.therapist = newTherapist._id;
-      await newUser.save();
+      await newUser.save(); // Save the updated user document
     }
 
-    // Return a success message along with the user data
+    // Respond with success message
     res.status(201).json({ msg: 'User registered successfully', user: newUser });
-  } catch (err) {
-    console.error('Error registering user:', err.message);
-    res.status(500).send('Server error');
+  } catch (error) {
+    console.error('Error registering user:', error.message); // Log detailed error
+    res.status(500).json({ error: 'Registration failed. Please try again.' });
   }
 });
 
@@ -99,33 +104,43 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  try {
-    // Find the user by email
-    const user = await User.findOne({ email });
+  // Validate input
+  if (!email || !password) {
+    return res.status(400).json({ msg: 'Please provide both email and password' });
+  }
 
-    // Log the user object to confirm it's being fetched
+  try {
+    // Trim and perform case-insensitive search for email
+    const emailTrimmed = email.trim();
+    console.log('Searching for user with email:', emailTrimmed);
+
+    const user = await User.findOne({ email: { $regex: new RegExp(`^${emailTrimmed}$`, 'i') } });
+
     console.log('User found during login:', user);
 
     if (!user) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+      return res.status(400).json({ msg: 'Invalid credentials. User not found.' });
     }
 
-    // Check if the password matches
+    // Compare entered password with the hashed password
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('Password comparison result:', isMatch);
+
     if (!isMatch) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+      return res.status(400).json({ msg: 'Invalid credentials. Password does not match.' });
     }
 
-    // Log the role to ensure it's present
     console.log('User role during login:', user.role);
 
-    // Create payload with user ID and role
+    // Create JWT payload with user ID and role
     const payload = {
       user: {
-        id: user.id,
-        role: user.role, // Ensure this value is set correctly
+        id: user._id,
+        role: user.role,
       },
     };
+
+    console.log('Signing JWT token with payload:', payload);
 
     // Sign the JWT token
     jwt.sign(
@@ -133,9 +148,15 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1h' },
       (err, token) => {
-        if (err) throw err;
+        if (err) {
+          console.error('Error signing JWT:', err);
+          throw err;
+        }
+
+        console.log('Generated JWT token:', token);
+
         // Send the token and role back to the frontend
-        res.json({ token, role: user.role }); // Confirm role is sent here
+        res.json({ token, role: user.role });
       }
     );
   } catch (err) {

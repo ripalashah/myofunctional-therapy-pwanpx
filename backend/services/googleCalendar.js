@@ -19,7 +19,35 @@ const createGoogleCalendarEvent = async (eventDetails) => {
   }
 };
 
-// Function to list calendar events
+// Function to delete a calendar event
+const deleteGoogleCalendarEvent = async (eventId) => {
+  try {
+    await calendar.events.delete({
+      calendarId: 'primary',
+      eventId,
+    });
+  } catch (error) {
+    console.error('Error deleting Google Calendar event:', error);
+    throw new Error('Failed to delete event');
+  }
+};
+
+// Function to update a calendar event
+const updateGoogleCalendarEvent = async (eventId, updatedDetails) => {
+  try {
+    const response = await calendar.events.update({
+      calendarId: 'primary',
+      eventId,
+      requestBody: updatedDetails,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating Google Calendar event:', error);
+    throw new Error('Failed to update event');
+  }
+};
+
+// Function to list calendar events (optional, if needed for additional features)
 const listGoogleCalendarEvents = async () => {
   try {
     const response = await calendar.events.list({
@@ -36,4 +64,9 @@ const listGoogleCalendarEvents = async () => {
   }
 };
 
-module.exports = { createGoogleCalendarEvent, listGoogleCalendarEvents };
+module.exports = {
+  createGoogleCalendarEvent,
+  deleteGoogleCalendarEvent,
+  updateGoogleCalendarEvent,
+  listGoogleCalendarEvents,
+};
