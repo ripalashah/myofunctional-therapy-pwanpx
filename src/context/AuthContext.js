@@ -1,4 +1,3 @@
-// src/context/AuthContext.js
 import React, { createContext, useState, useEffect } from 'react';
 
 // Create the AuthContext
@@ -18,12 +17,15 @@ export const AuthProvider = ({ children }) => {
   const login = (userData) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('role', userData.role); // Store the role separately
+    localStorage.setItem('token', userData.token); // Store the token separately
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token'); // Remove the token if stored separately
+    localStorage.removeItem('role'); // Remove the role if stored separately
   };
 
   return (

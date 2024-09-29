@@ -1,13 +1,14 @@
-// src/components/Login.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Layout from './Layout'; // Import Layout component
+import { AuthContext } from '../context/AuthContext';
 import { Container, TextField, Button, Typography, Box, Paper } from '@mui/material'; // Import MUI components
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const { login } = useContext(AuthContext); // Use login function from AuthContext
   const navigate = useNavigate();
 
   // Handle input changes
@@ -27,9 +28,10 @@ const Login = () => {
         },
       });
 
+      const userData = { token: res.data.token, role: res.data.role };
+
       // Store the token and role upon successful login
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('role', res.data.role);
+      login(userData);
 
       alert('Login successful');
 

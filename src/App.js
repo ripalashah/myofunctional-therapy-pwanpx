@@ -27,7 +27,6 @@ function App() {
           <Route path="/progress" element={<ProtectedRoute role="patient" component={ProgressTracking} />} />
           <Route path="/medical-history" element={<ProtectedRoute role="patient" component={MedicalHistoryForm} />} />
           <Route path="/referral-dashboard" element={<ProtectedRoute role="referral-source" component={ReferralDashboard} />} />
-          {/* Add additional routes as necessary */}
         </Routes>
       </Router>
     </AuthProvider>
