@@ -8,24 +8,68 @@ const User = require('../models/User'); // Ensure the User model is imported
 router.post('/create-patient', auth, async (req, res) => {
   try {
     const therapistId = req.user.id; // Therapist ID from the authenticated user
+    
     let user = await User.findOne({ email: req.body.email });
-    // Create a new patient based on data passed in the request body
+    if (user) {
+      return res.status(400).json({ error: 'User with this email already exists' });
+    }
+
+    // Create a new user for the patient
     const newUser = new User({
       email: req.body.email,
       password: 'defaultPassword123', // You may want to generate or request a password securely
       role: 'patient', // Set the role to 'patient'
     });
-
     await newUser.save();
 
-    // Then, create the patient linked to this user
+    // Destructure medicalHistory from request body to handle each part separately
+    const {
+      name,
+      age,
+      contact,
+      email,
+      medicalHistory: {
+        childhoodIllnesses,
+        immunizationDates,
+        medicalProblems,
+        surgeries,
+        allergies,
+        medications,
+        developmentalHistory,
+        prenatalHistory,
+        feedingHistory,
+        oralHabits,
+        dentalHistory,
+        sleepPattern,
+        foodIntolerances,
+        otherDetails
+      }
+    } = req.body;
+
+    // Create a new patient with the detailed medical history
     const newPatient = new Patient({
-      name: req.body.name,
-      age: req.body.age,
-      contact: req.body.contact,
-      email: req.body.email,
-      medicalHistory: req.body.medicalHistory,
-      userId: newUser._id, // Link the patient to the newly created user
+      name,
+      age,
+      contact,
+      email,
+      medicalHistory: {
+        childhoodIllnesses,
+        immunizationDates,
+        medicalProblems,
+        surgeries, // Array of surgery objects
+        allergies, // Array of allergy objects
+        medications, // Array of medication objects
+        developmentalHistory, // Array of developmental milestones
+        prenatalHistory, // Prenatal history object
+        feedingHistory, // Feeding history object
+        oralHabits, // Oral habits object
+        dentalHistory, // Dental history object
+        sleepPattern, // Sleep pattern object
+        foodIntolerances, // Array of food intolerances
+        otherDetails // Any other details
+      },
+      therapistId, // Linked therapist ID
+      userId: newUser._id, // Link to the newly created user
     });
 
     await newPatient.save();
@@ -36,7 +80,25 @@ router.post('/create-patient', auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+// Route to update medical history for an existing patient
+router.put('/:id/update-medical-history', auth, async (req, res) => {
+  try {
+    const patient = await Patient.findById(req.params.id);
+    if (!patient) return res.status(404).json({ error: 'Patient not found' });
+
+    const updatedMedicalHistory = req.body.medicalHistory;
+
+    // Update the medical history fields
+    patient.medicalHistory = updatedMedicalHistory;
+
+    await patient.save();
+    res.status(200).json({ message: 'Medical history updated successfully', patient });
+  } catch (error) {
+    console.error('Error updating medical history:', error);
+    res.status(500).json({ error: 'Failed to update medical history' });
+  }
+});
+
 
 // Route to get all patients for a logged-in therapist
 router.get('/therapist-patients', auth, async (req, res) => {
