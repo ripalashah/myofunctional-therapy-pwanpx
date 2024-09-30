@@ -1,61 +1,48 @@
-// src/components/PatientList.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Typography, Card, CardContent, Grid, Box } from '@mui/material';
+import { List, ListItem, ListItemText, Typography } from '@mui/material';
 
 const PatientList = () => {
   const [patients, setPatients] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Fetch patients when the component loads
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const res = await axios.get('/api/patients/therapist-patients', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        const response = await axios.get('http://localhost:5000/api/patients/therapist-patients', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Use token from localStorage for authorization
+          },
         });
-        setPatients(res.data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching patients:', error);
-        setLoading(false);
+        setPatients(response.data);
+      } catch (err) {
+        console.error('Error fetching patients:', err);
+        setError('Failed to fetch patients.');
       }
     };
 
     fetchPatients();
   }, []);
 
-  if (loading) {
-    return <Typography>Loading patients...</Typography>;
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
   }
 
   return (
-    <Container maxWidth="md">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Patient List
-        </Typography>
-        {patients.length === 0 ? (
-          <Typography>No patients available.</Typography>
-        ) : (
-          <Grid container spacing={3}>
-            {patients.map((patient) => (
-              <Grid item xs={12} key={patient._id}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6">{patient.name}</Typography>
-                    <Typography>Email: {patient.email}</Typography>
-                    <Typography>Phone: {patient.phone}</Typography>
-                    <Typography>Age: {patient.age}</Typography>
-                    {/* Add more patient details as needed */}
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </Box>
-    </Container>
+    <List>
+      {patients.length > 0 ? (
+        patients.map((patient) => (
+          <ListItem key={patient._id}>
+            <ListItemText
+              primary={patient.name}
+              secondary={`Email: ${patient.email} | Contact: ${patient.contact} | Linked User Email: ${patient.userId?.email || 'N/A'}`}
+            />
+          </ListItem>
+        ))
+      ) : (
+        <Typography>No patients found.</Typography>
+      )}
+    </List>
   );
 };
 

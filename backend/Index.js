@@ -8,12 +8,13 @@ const authRoutes = require('./routes/auth'); // Path to authentication routes
 const userRoutes = require('./routes/UserRoutes'); // Path to user-related routes
 const appointmentRoutes = require('./routes/appointments'); // Path to appointment routes
 const therapistRoutes = require('./routes/therapists'); // Ensure this points to the correct route file
+const patientRoutes = require('./routes/patients'); // Ensure this points to the correct route file
 
 const app = express();
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://ripalashah.com'], // Replace with frontend origins
+    origin: ['http://localhost:3000'], // Replace with frontend origins
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // Allow credentials
@@ -39,6 +40,7 @@ app.use('/api/users', userRoutes); // Handle user-related requests
 app.use('/api/auth', authRoutes); // Handle authentication-related requests
 app.use('/api/appointments', appointmentRoutes); // Handle appointment-related requests
 app.use('/api/therapists', therapistRoutes); // Add the therapists route here
+app.use('/api/patients', patientRoutes); // Handle patient-related requests
 // Basic root endpoint to confirm server is running
 app.get('/', (req, res) => {
     res.send('API is running...');

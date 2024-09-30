@@ -10,7 +10,7 @@ import ProgressTracking from './components/ProgressTracking';
 import MedicalHistoryForm from './components/MedicalHistoryForm';
 import ProtectedRoute from './components/ProtectedRoute';
 import ReferralDashboard from './components/ReferralDashboard';
-import { AuthProvider } from './context/AuthContext'; // Ensure the path is correct
+import { AuthProvider } from './context/AuthContext'; // Ensure AuthContext path is correct
 
 function App() {
   return (
