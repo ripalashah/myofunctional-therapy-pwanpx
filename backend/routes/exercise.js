@@ -4,8 +4,6 @@ const router = express.Router();
 const ExercisePlan = require('../models/ExercisePlan');
 const auth = require('../middleware/auth');
 // backend/routes/exercise.js
-const express = require('express');
-const ExercisePlan = require('../models/ExercisePlan');
 const authMiddleware = require('../middleware/auth');
 
 // Create an exercise plan

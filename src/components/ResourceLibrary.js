@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Grid, TextField, Button, Select, MenuItem, InputLabel, FormControl, Paper } from '@mui/material';
+import { Typography, Grid, TextField, Button, Select, MenuItem, InputLabel, FormControl, Paper } from '@mui/material';
 
 const ResourceLibrary = () => {
   const [resourceType, setResourceType] = useState('Exercise'); // Default value

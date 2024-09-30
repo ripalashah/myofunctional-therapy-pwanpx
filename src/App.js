@@ -10,6 +10,10 @@ import ProgressTracking from './components/ProgressTracking';
 import MedicalHistoryForm from './components/MedicalHistoryForm';
 import ProtectedRoute from './components/ProtectedRoute';
 import ReferralDashboard from './components/ReferralDashboard';
+import ResourceLibrary from './components/ResourceLibrary'; // Update to ResourceLibrary
+import PatientIncentives from './components/PatientIncentives'; // Update to PatientIncentives
+import ViewProgress from './components/ViewProgress'; // Update to ViewProgress
+import SleepQuestionnaire from './components/SleepQuestionnaire'; // Ensure this file exists or create it
 import { AuthProvider } from './context/AuthContext'; // Ensure AuthContext path is correct
 
 function App() {
@@ -27,6 +31,10 @@ function App() {
           <Route path="/progress" element={<ProtectedRoute role="patient" component={ProgressTracking} />} />
           <Route path="/medical-history" element={<ProtectedRoute role="patient" component={MedicalHistoryForm} />} />
           <Route path="/referral-dashboard" element={<ProtectedRoute role="referral-source" component={ReferralDashboard} />} />
+          <Route path="/library" element={<ProtectedRoute role="therapist" component={ResourceLibrary} />} /> {/* Corrected name */}
+          <Route path="/incentives" element={<ProtectedRoute role="patient" component={PatientIncentives} />} /> {/* Corrected name */}
+          <Route path="/progress-logs" element={<ProtectedRoute role="therapist" component={ViewProgress} />} /> {/* Corrected name */}
+          <Route path="/sleep-questionnaire" element={<ProtectedRoute role="patient" component={SleepQuestionnaire} />} /> {/* Ensure file exists */}
         </Routes>
       </Router>
     </AuthProvider>
