@@ -4,6 +4,19 @@ import { TextField, Button, Typography, Box, Paper, Stepper, Step, StepLabel, Fo
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'; // Import DatePicker from MUI X
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'; // Localization for DatePicker
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'; // Adapter for date-fns
+import ChildhoodIllnessesStep from './ChildhoodIllnessesStep';
+import MedicalProblemsStep from './MedicalProblemsStep';
+import SurgeriesStep from './SurgeriesStep';
+import DrugsOTCStep from './DrugsOTCStep';
+import PrenatalHistoryStep from './PrenatalHistoryStep';
+import DevelopmentHistoryStep from './DevelopmentHistoryStep';
+import InterventionsStep from './InterventionsStep';
+import SpeechStep from './SpeechStep';
+import SensorySystemStep from './SensorySystemStep';
+import SleepingPatternStep from './SleepingPatternStep';
+import FeedingHistoryStep from './FeedingHistoryStep';
+import OralHabitsStep from './OralHabitsStep';
+import DentalHistoryStep from './DentalHistoryStep';
 
 const CreatePatient = ({ onPatientCreated }) => {
   const [formData, setFormData] = useState({
@@ -22,11 +35,184 @@ const CreatePatient = ({ onPatientCreated }) => {
       chiefComplaint: ''
     },
     childhoodIllnesses: { measles: false, mumps: false, rubella: false, chickenpox: false, other: '' },
-    medicalProblems: { asthma: false, pneumonia: false, diabetes: false },
-    surgeries: [{ year: '', reason: '', hospital: '' }],
-    dentalHistory: { dentistName: '', lastVisit: null },
-    fileUploads: [], // To store uploaded files
-  });
+    medicalProblems: {
+      prematureBirth: false,
+      feedingDisorder: false,
+      seizures: false,
+      eatingAppetiteProblems: false,
+      otitisMedia: false,
+      nasalObstruction: false,
+      enlargedTonsils: false,
+      earProblems: false,
+      sinusInfection: false,
+      snoring: false,
+      reflux: false,
+      deviatedSeptum: false,
+      troubleSleeping: false,
+      headachesMigraines: false,
+      neckShoulderPain: false,
+      geneticDisorder: false,
+      bloodDiseases: false,
+      pneumonia: false,
+      asthma: false,
+      heartMurmur: false,
+      otherHeartCondition: false,
+      chestPain: false,
+      bloodPressure: false,
+      kidneyProblems: false,
+      lungProblems: false,
+      thyroidProblems: false,
+      liverProblems: false,
+      diabetes: false,
+      panicWhenStressed: false,
+      addAdhd: false,
+      depression: false,
+      anxiety: false,
+      mouthBreathing: false,
+      celiacDisease: false
+    },
+    surgeries: [{ year: '', reason: '', hospital: '' }], // Initial empty surgery
+    hospitalizations: [{ year: '', reason: '', hospital: '' }], // Initial empty hospitalization
+    bloodTransfusion: {
+      hadTransfusion: false,
+      explanation: ''
+    },
+    drugs: [{ name: '', strength: '', frequency: '' }],
+    allergies: { drugName: '', reaction: '', pollen: false, dust: false, trees: false, redDye: false, grass: false, latex: false, beeStings: false, food: false, other: '' },
+    intolerances: { gluten: false, dairy: false, redDye: false, shellfish: false, nuts: false, eggs: false, others: '' },
+    prenatalHistory: {
+      history: '', // Normal, Atypical, Complications
+      complications: '', // Description of complications
+      term: '', // 40+ weeks, 39-37 weeks, 36-33 weeks, Other
+      laborDelivery: '', // Normal, Induced, C-Section
+      complications: {
+        protractedLabor: false,
+        forceps: false,
+        vacuum: false
+      },
+      csectionComplications: '' // Description of C-section complications
+    },
+    developmentalHistory: {
+      heldHeadUp: 'onTime', // Options: 'onTime', 'delayed'
+      rolledOver: 'onTime',
+      walking: 'onTime',
+      running: 'onTime',
+      coloring: 'onTime',
+      writing: 'onTime' // You can add more fields if necessary
+    },
+    interventions: {
+      speechTherapy: { name: '', contactInfo: '', reason: '' },
+      occupationalTherapy: { name: '', contactInfo: '', reason: '' },
+      physicalTherapy: { name: '', contactInfo: '', reason: '' },
+      abaTherapy: { name: '', contactInfo: '', reason: '' },
+      otherTherapy: { name: '', contactInfo: '', reason: '' },
+    },
+    speech: {
+      frustration: false,
+      lisp: false,
+      speakingFast: false,
+      stuttering: false,
+      soundIssues: false,
+      soundDetails: '',
+      mumbling: false,
+    },
+    sensorySystem: {
+      light: { type: Boolean, default: false },
+      sound: { type: Boolean, default: false },
+      texture: { type: Boolean, default: false },
+      selfRegulation: { type: Boolean, default: false },
+      hypersensitive: { type: Boolean, default: false },
+      other: { type: String, default: '' },
+    },
+    sleepingPattern: {
+      goodSleeper: { type: Boolean, default: false },
+      childSleepConcerns: { type: Boolean, default: false },
+      childSleepExplanation: { type: String, default: '' }, // For further explanation if any concerns
+    },
+    feedingHistory: {
+      infantHistory: {
+        breastfed: false,
+        bottleFedBreastmilk: false,
+        bottleFed: false,
+        nasogastricTube: false,
+      },
+      feedingCharacterizedBy: {
+        difficultyLatch: false,
+        reflux: false,
+        gastricDiscomfort: false,
+        phasicBiteReflex: false,
+        poorSuckSkill: false,
+        poorMilkSupply: false,
+        neededNippleShield: false,
+        labialTie: false,
+        tongueTie: false,
+        mastitisInfections: false,
+        poorRootingReflex: false,
+      },
+      infantChildrenAdult: {
+        frustration: false,
+        packingFood: false,
+        difficultyTransitioning: false,
+        chokingGagging: false,
+        pickyEater: false,
+        anyTexture: false,
+        grazeFood: false,
+        wontTryNewFood: false,
+      },
+      qualityOfFeeding: '',
+      solidFoodIntroduction: [
+        { product: 'Rice Cereal', month: '', response: '' },
+        { product: 'Pureed', month: '', response: '' },
+        { product: 'Level 3 (Lumpy Puree)', month: '', response: '' },
+        { product: 'Finger Foods', month: '', response: '' },
+        { product: 'Soft Mechanical Diet', month: '', response: '' },
+        { product: 'Full Mechanical Diet', month: '', response: '' },
+      ],
+      currentDietQuality: '',
+      canSwallowPills: false,
+      requiresFluids: false,
+    },
+    oralHabits: {
+      pacifier: {
+        duringDay: false,
+        atNight: false,
+        resolvedBy: ''
+      },
+      thumbDigit: {
+        duringDay: false,
+        atNight: false,
+        resolvedBy: ''
+      },
+      objects: {
+        duringDay: false,
+        atNight: false,
+        resolvedBy: ''
+      }
+    },
+    dentalHistory: {
+      dentistName: '',
+      dentistAddress: '',
+      orthodontistName: '',
+      orthodontistAddress: '',
+      lastVisitReason: '',
+      lastVisitDate: '',
+      brushingFrequency: '',
+      dentalProblem: false,
+      teethSensitivity: false,
+      frequentColdSores: false,
+      badOdorsTaste: false,
+      gumBleeding: false,
+      teethGrinding: false,
+      biteProblems: false,
+      jawProblems: false,
+      frequentHeadaches: false,
+      tmjTreatment: false,
+      orthodonticTreatment: false,
+      bitePlate: false,
+      satisfiedWithSmile: false,
+      smileChange: ''
+    },
+});
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -66,6 +252,38 @@ const CreatePatient = ({ onPatientCreated }) => {
   const handleFileUpload = (event) => {
     const selectedFiles = Array.from(event.target.files);
     setFiles([...files, ...selectedFiles]);
+  };
+
+   // Add surgery
+   const addSurgery = () => {
+    setFormData({
+      ...formData,
+      surgeries: [...formData.surgeries, { year: '', reason: '', hospital: '' }]
+    });
+  };
+
+  // Remove surgery
+  const removeSurgery = (index) => {
+    const updatedSurgeries = formData.surgeries.filter((_, i) => i !== index);
+    setFormData({
+      ...formData,
+      surgeries: updatedSurgeries
+    });
+  };
+
+  // Example for managing the drugs list
+  const addDrug = () => {
+    setFormData(prevState => ({
+      ...prevState,
+      drugsOTC: [...prevState.drugsOTC, { name: '', strength: '', frequency: '' }] // Add an empty drug object
+    }));
+  };
+
+  const removeDrug = (index) => {
+    setFormData(prevState => ({
+      ...prevState,
+      drugsOTC: prevState.drugsOTC.filter((_, i) => i !== index) // Remove the drug at the specified index
+    }));
   };
 
   // Handle form submission
@@ -182,36 +400,63 @@ const CreatePatient = ({ onPatientCreated }) => {
             />
           </>
         );
+      case 1:
+        return <ChildhoodIllnessesStep formData={formData} onChange={onChange} />;
+      case 2:
+        return <MedicalProblemsStep formData={formData} onChange={onChange} />;
+      case 3:
+        return <SurgeriesStep formData={formData} onChange={onChange} addSurgery={addSurgery} removeSurgery={removeSurgery} />;
+      case 4:
+        return <DrugsOTCStep formData={formData} onChange={onChange} addDrug={addDrug} removeDrug={removeDrug} />;
+      case 5:
+        return <PrenatalHistoryStep formData={formData} onChange={onChange} />;
       case 6:
-        return (
-          <>
-            <TextField
-              fullWidth
-              name="dentalHistory.dentistName"
-              label="Dentist Name"
-              value={formData.dentalHistory.dentistName}
-              onChange={onChange}
-              margin="normal"
-            />
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Last Visit"
-                value={formData.dentalHistory.lastVisit}
-                onChange={(date) => handleDateChange('dentalHistory.lastVisit', date)}
-                renderInput={(params) => <TextField fullWidth margin="normal" {...params} />}
-              />
-            </LocalizationProvider>
-          </>
-        );
+        return <DevelopmentHistoryStep formData={formData} onChange={onChange} />;
       case 7:
-        return (
-          <>
-            <Typography variant="h6" gutterBottom>
-              Upload Medical Documents
-            </Typography>
-            <Input type="file" multiple onChange={handleFileUpload} />
-          </>
-        );
+        return <InterventionsStep formData={formData} onChange={onChange} />;
+      case 8:
+        return <SpeechStep formData={formData} onChange={onChange} />;
+      case 9:
+        return <SensorySystemStep formData={formData} onChange={onChange} />;
+      case 10:
+        return <SleepingPatternStep formData={formData} onChange={onChange} />;
+      case 11:
+        return <FeedingHistoryStep formData={formData} onChange={onChange} />;
+      case 12:
+        return <OralHabitsStep formData={formData} onChange={onChange} />;
+      case 13:
+        return <DentalHistoryStep formData={formData} onChange={onChange} />;
+      
+        // return (
+        //   <>
+        //     <TextField
+        //       fullWidth
+        //       name="dentalHistory.dentistName"
+        //       label="Dentist Name"
+        //       value={formData.dentalHistory.dentistName}
+        //       onChange={onChange}
+        //       margin="normal"
+        //     />
+        //     <LocalizationProvider dateAdapter={AdapterDateFns}>
+        //       <DatePicker
+        //         label="Last Visit"
+        //         value={formData.dentalHistory.lastVisit}
+        //         onChange={(date) => handleDateChange('dentalHistory.lastVisit', date)}
+        //         renderInput={(params) => <TextField fullWidth margin="normal" {...params} />}
+        //       />
+        //     </LocalizationProvider>
+        //   </>
+        // );
+      
+      // case 7:
+      //   return (
+      //     <>
+      //       <Typography variant="h6" gutterBottom>
+      //         Upload Medical Documents
+      //       </Typography>
+      //       <Input type="file" multiple onChange={handleFileUpload} />
+      //     </>
+      //   );
       default:
         return null;
     }
