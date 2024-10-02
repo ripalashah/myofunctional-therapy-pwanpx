@@ -18,6 +18,7 @@ const storeRoutes = require('./routes/store'); // Path to store-related routes (
 const progressRoutes = require('./routes/progress'); // Path to progress-related routes
 const resourcesRoutes = require('./routes/resources'); // Path to resources-related routes
 const sleepQuestionnaireRoutes = require('./routes/sleepQuestionnaire'); // Import the sleep questionnaire routes
+const hipaaRoutes = require('./routes/hipaa');
 
 const app = express();
 
@@ -59,6 +60,7 @@ app.use('/api/store', storeRoutes); // Handle store-related requests (products a
 app.use('/api/progress', progressRoutes); // Handle progress-related requests
 app.use('/api/resources', resourcesRoutes); // Handle resource-related requests
 app.use('/api/sleep-questionnaire', sleepQuestionnaireRoutes); // Add the sleep questionnaire routes
+app.use('/api/hipaa', hipaaRoutes); 
 
 // Basic root endpoint to confirm server is running
 app.get('/', (req, res) => {

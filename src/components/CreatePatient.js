@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { TextField, Button, Typography, Box, Paper, Stepper, Step, StepLabel, FormControl, InputLabel, Select, MenuItem, FormHelperText, Alert, Input} from '@mui/material';
+import { TextField, Button, Typography, Box, Paper, Stepper, Step, StepLabel, FormControl, InputLabel, Select, MenuItem, FormHelperText, Alert, Input, FormControlLabel, Checkbox } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'; // Import DatePicker from MUI X
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'; // Localization for DatePicker
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'; // Adapter for date-fns
@@ -212,6 +212,12 @@ const CreatePatient = ({ onPatientCreated }) => {
       bitePlate: false,
       satisfiedWithSmile: false,
       smileChange: ''
+    },
+    hipaaConsent: {
+      signedPrivacyPolicy: false,
+      consentForBilling: false,
+      consentForReleaseOfInfo: false,
+      photoVideoRelease: false,
     } 
 }); 
 
@@ -225,7 +231,7 @@ const CreatePatient = ({ onPatientCreated }) => {
   'Sensory System', 
   'Sleeping Pattern', 
   'Feeding History', 
-  'Oral Habits', 'Dental History', 'Upload Medical Documents'];
+  'Oral Habits', 'Dental History', 'Upload Medical Documents', 'HIPAA Consent'];
 
   const handleNext = () => setActiveStep((prevStep) => prevStep + 1);
   const handleBack = () => setActiveStep((prevStep) => prevStep - 1);
@@ -492,6 +498,54 @@ const onSubmit = async (e) => {
             <Input type="file" multiple onChange={handleFileUpload} /> {/* Use handleFileUpload */}
           </>
         );
+        case 15: // HIPAA consent step
+      return (
+        <>
+          <Typography variant="h6">HIPAA Consent</Typography>
+          <FormControl component="fieldset">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="hipaaConsent.signedPrivacyPolicy"
+                  checked={formData.hipaaConsent.signedPrivacyPolicy}
+                  onChange={onChange}
+                />
+              }
+              label="I consent to the privacy policy"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="hipaaConsent.consentForBilling"
+                  checked={formData.hipaaConsent.consentForBilling}
+                  onChange={onChange}
+                />
+              }
+              label="I consent to billing policies"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="hipaaConsent.consentForReleaseOfInfo"
+                  checked={formData.hipaaConsent.consentForReleaseOfInfo}
+                  onChange={onChange}
+                />
+              }
+              label="I consent to release of medical information"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="hipaaConsent.photoVideoRelease"
+                  checked={formData.hipaaConsent.photoVideoRelease}
+                  onChange={onChange}
+                />
+              }
+              label="I consent to photo and video release"
+            />
+          </FormControl>
+        </>
+      );
       default:
         return null;
     }

@@ -1,0 +1,32 @@
+Date,Time1,Day,Time2,Tithi,Rashi,Nakshatra,Notes
+1,6:10,8,19:21,Ashtami Shukla,Tula,Swati 27:40+,
+2,6:11,8,19:21,Ashtami Shukla,Tula 23:52,Vishakha,
+3,6:11,9,19:20,Navami Shukla,Vrishchika,Vishakha 06:35,
+4,6:12,10,19:20,Dashami Shukla,Vrishchika,Anuradha 09:12,
+5,6:12,11,19:19,Ekadashi Shukla,Vrishchika 11:23,Jyeshtha 11:23,Shravana Putrada Ekadashi
+6,6:13,12,19:18,Dwadashi Shukla,Dhanu,Mula 13:00,Pradosh Vrat
+7,6:13,13,19:18,Trayodashi Shukla,Dhanu 20:11,P Ashadha 14:01,
+8,6:13,14,19:17,Chaturdashi Shukla,Makara,U Ashadha 14:28,Varalakshmi Vrat
+9,6:14,15,19:16,Purnima Shukla,Makara 26:11+,Shravana 14:23,"Rakhi, Anvadhan, Raksha Bandhan, Gayatri Jayanti, Shravana Purnima"
+10,6:14,16,19:16,Pratipada Krishna,Kumbha,Dhanishtha 13:52,Ishti
+11,6:14,17,19:15,Dwitiya Krishna,Kumbha 30:10+,Shatabhisha 13:00,
+12,6:15,18,19:14,Tritiya Krishna,Meena,P Bhadrapada 11:52,"Kajari Teej, Bahula Chaturthi, Heramba Sankashti Chaturth"
+13,6:15,"19,20",19:13,Chaturthi Krishna,Meena,U Bhadrapada 10:32,
+14,6:16,21,19:13,Shashthi Krishna,Meena 09:06,Revati 09:06,Balarama Jayanti
+15,6:16,22,19:12,Saptami Krishna,Mesha,Ashwini 07:36,Janmashtami *Smarta
+16,6:16,23,19:11,Ashtami Krishna,Mesha 11:43,Krittika 28:38+,"Dahi Handi, Janmashtami *ISKCON"
+17,6:17,24,19:10,Navami Krishna,Vrishabha,Rohini 27:17+,Simha Sankranti
+18,6:17,25,19:09,Dashami Krishna,Vrishabha 14:40,Mrigashirsha 26:06+,
+19,6:17,26,19:09,Ekadashi Krishna,Mithuna,Ardra 25:07+,Aja Ekadashi
+20,6:18,27,19:08,Dwadashi Krishna,Mithuna 18:35,Punarvasu 24:27+,Pradosh Vrat
+21,6:18,28,19:07,Trayodashi Krishna,Karka,Pushya 24:08+,Agastya Arghya
+22,6:19,29,19:06,Chaturdashi Krishna,Karka 24:16+,Ashlesha 24:16+,"Anvadhan, Darsha Amavasya, Pithori Amavasya"
+23,6:19,30,19:05,Amavasya Krishna,Simha,Magha 24:54+,"Ishti, Shravana Amavasya"
+24,6:19,1,19:04,Pratipada Shukla,Simha,P Phalguni 26:05+,Chandra Darshana
+25,6:20,2,19:03,Dwitiya Shukla,Simha 08:28,U Phalguni 27:49+,Varaha Jayanti
+26,6:20,3,19:03,Tritiya Shukla,Kanya,Hasta 30:04+,Hartalika Teej
+27,6:20,4,19:02,Chaturthi Shukla,Kanya 19:21,Chitra,Ganesh Chaturthi
+28,6:21,5,19:01,Panchami Shukla,Tula,Chitra 08:43,Rishi Panchami
+29,6:21,6,19:00,Shashthi Shukla,Tula,Swati 11:38,
+30,6:21,7,18:59,Saptami Shukla,Tula 07:53,Vishakha 14:37,
+31,6:22,8,18:58,Ashtami Shukla,Vrishchika,Anuradha 17:27,"Radha Ashtami, Durva Ashtami, Mahalakshmi Vrat Begins"

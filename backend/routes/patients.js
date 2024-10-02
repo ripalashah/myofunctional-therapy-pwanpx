@@ -4,6 +4,7 @@ const auth = require('../middleware/auth'); // Middleware to authenticate users
 const multer = require('multer'); // Import multer for file handling
 const Patient = require('../models/Patient');
 const User = require('../models/User'); // Ensure the User model is imported
+const HIPAAForm = require('../models/HIPAA'); // Import the HIPAAForm model
 
 // Setup multer for file uploads
 const upload = multer({ dest: 'uploads/' }); // Files will be stored in the 'uploads' directory
@@ -47,6 +48,14 @@ router.post('/create-patient', auth, upload.array('files'), async (req, res) => 
     });
 
     await newPatient.save();
+     // Now also submit the HIPAA form during patient creation
+     const hipaaForm = new HIPAAForm({
+      patientId: newPatient._id,
+      signedPrivacyPolicy: req.body.signedPrivacyPolicy,
+      consentForBilling: req.body.consentForBilling,
+      consentForReleaseOfInfo: req.body.consentForReleaseOfInfo,
+      photoVideoRelease: req.body.photoVideoRelease
+    });
     res.status(201).json(newPatient); 
   } catch (error) {
     console.error('Error creating patient:', error);
@@ -61,7 +70,8 @@ router.get('/:id/history', auth, async (req, res) => {
       .populate('userId', 'name email')
       .populate('appointments')
       .populate('progressLogs')
-      .populate('forms');
+      .populate('forms')
+      .populate('hipaaForm');  // Add HIPAA form data here
       
     if (!patient) {
       return res.status(404).json({ error: 'Patient not found' });
@@ -144,6 +154,22 @@ router.post('/:id/session-note', auth, async (req, res) => {
   } catch (error) {
     console.error('Error adding session note:', error);
     res.status(500).json({ error: 'Failed to log session note' });
+  }
+});
+
+router.post('/hipaa', auth, async (req, res) => {
+  try {
+    const hipaaForm = new HIPAAForm({
+      patientId: req.user.id,
+      signedPrivacyPolicy: req.body.signedPrivacyPolicy,
+      consentForBilling: req.body.consentForBilling,
+      consentForReleaseOfInfo: req.body.consentForReleaseOfInfo,
+      photoVideoRelease: req.body.photoVideoRelease
+    });
+    await hipaaForm.save();
+    res.status(201).json({ message: 'HIPAA Form submitted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to submit form' });
   }
 });
 

@@ -49,4 +49,16 @@ router.post('/hipaa', auth, async (req, res) => {
     }
 });
 
+// HIPAA Form retrieval route
+router.get('/hipaa/:patientId', auth, async (req, res) => {
+    try {
+      const hipaaForm = await HIPAAForm.findOne({ patientId: req.params.patientId });
+      if (!hipaaForm) {
+        return res.status(404).json({ message: 'HIPAA form not found' });
+      }
+      res.status(200).json(hipaaForm);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to retrieve HIPAA form' });
+    }
+  });
 module.exports = router;

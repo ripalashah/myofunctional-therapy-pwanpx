@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const HIPAAFormSchema = new mongoose.Schema({
-    patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient', required: true },
     signedPrivacyPolicy: { type: Boolean, required: true },
     consentForBilling: { type: Boolean, required: true },
     consentForReleaseOfInfo: { type: Boolean, required: true },
@@ -10,4 +10,5 @@ const HIPAAFormSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('HIPAAForm', HIPAAFormSchema);
+const HIPAAForm = mongoose.model('HIPAAForm', HIPAAFormSchema);
+module.exports = HIPAAForm;

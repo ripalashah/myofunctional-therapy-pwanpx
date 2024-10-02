@@ -1,23 +1,24 @@
 const mongoose = require('mongoose');
 const MedicalHistorySchema = require('./MedicalHistory');
+const Form = require('./Form');  // Ensure this line is added
 
 // Updated Patient Schema
 const PatientSchema = new mongoose.Schema({
   name: { type: String, required: true },
   age: { type: Number },
-  contact: { type: String  },
+  contact: { type: String },
   email: { type: String, required: true },
-  address: { type: String }, // Added address for the patient
+  address: { type: String },
   occupation: { type: String },
-  forms: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Form' }],
-  medicalHistory: MedicalHistorySchema, // Link to the detailed Medical History schema
+  forms: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Form' }],  // Reference the Form model
+  medicalHistory: MedicalHistorySchema,
   progressLogs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ProgressLog' }],
   appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' }],
   therapistId: { type: mongoose.Schema.Types.ObjectId, ref: 'Therapist' },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: { type: Date, default: Date.now },
+  hipaaForm: { type: mongoose.Schema.Types.ObjectId, ref: 'HIPAAForm' }, // Add the reference to HIPAA form
+  createdAt: { type: Date, default: Date.now }
 });
 
 const Patient = mongoose.model('Patient', PatientSchema);
-
 module.exports = Patient;
