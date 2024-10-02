@@ -1,22 +1,24 @@
 import React from 'react';
-import { TextField, Button, Box, Typography, Grid, Checkbox, FormControlLabel } from '@mui/material';
+import { TextField, Button, Box, Typography, Grid, Checkbox, FormControlLabel, IconButton } from '@mui/material';
+import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 
-const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
+const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug, handleDrugChange }) => {
+  
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="h6" gutterBottom>
         List Your Prescribed Drugs and Over-the-Counter Drugs (Vitamins, Inhalers)
       </Typography>
 
-      {formData.drugs.map((drug, index) => (
+      {/* Render Drugs if formData.drugs is an array */}
+      {(formData.drugs || []).map((drug, index) => (
         <Grid container spacing={2} key={index}>
           <Grid item xs={4}>
             <TextField
               fullWidth
               label="Name the Drug"
-              name={`drugs.${index}.name`}
-              value={drug.name}
-              onChange={onChange}
+              value={drug.name || ''} // Ensure it doesn't break if drug.name is undefined
+              onChange={(e) => handleDrugChange(index, 'name', e.target.value)}
               margin="normal"
             />
           </Grid>
@@ -24,9 +26,8 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
             <TextField
               fullWidth
               label="Strength"
-              name={`drugs.${index}.strength`}
-              value={drug.strength}
-              onChange={onChange}
+              value={drug.strength || ''} // Ensure it doesn't break if drug.strength is undefined
+              onChange={(e) => handleDrugChange(index, 'strength', e.target.value)}
               margin="normal"
             />
           </Grid>
@@ -34,21 +35,27 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
             <TextField
               fullWidth
               label="Frequency Taken"
-              name={`drugs.${index}.frequency`}
-              value={drug.frequency}
-              onChange={onChange}
+              value={drug.frequency || ''} // Ensure it doesn't break if drug.frequency is undefined
+              onChange={(e) => handleDrugChange(index, 'frequency', e.target.value)}
               margin="normal"
             />
           </Grid>
           <Grid item xs={12}>
-            <Button color="secondary" onClick={() => removeDrug(index)}>
-              Remove Drug
-            </Button>
+            <IconButton onClick={() => removeDrug(index)}>
+              <RemoveCircleOutline />
+            </IconButton>
           </Grid>
         </Grid>
       ))}
 
-      <Button color="primary" onClick={addDrug} sx={{ mt: 2 }}>
+      {/* Add Drug Button */}
+      <Button
+        startIcon={<AddCircleOutline />}
+        onClick={addDrug}
+        variant="outlined"
+        color="primary"
+        sx={{ mt: 2 }}
+      >
         Add Another Drug
       </Button>
 
@@ -61,9 +68,9 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <TextField
             fullWidth
             label="Name of the Drug you are allergic to"
-            name="allergies.drugName"
-            value={formData.allergies.drugName}
+            value={formData.allergies?.drugName || ''} // Handle undefined allergy fields safely
             onChange={onChange}
+            name="allergies.drugName"
             margin="normal"
           />
         </Grid>
@@ -71,9 +78,9 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <TextField
             fullWidth
             label="Reaction you had"
-            name="allergies.reaction"
-            value={formData.allergies.reaction}
+            value={formData.allergies?.reaction || ''} // Handle undefined allergy fields safely
             onChange={onChange}
+            name="allergies.reaction"
             margin="normal"
           />
         </Grid>
@@ -88,7 +95,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.allergies.pollen}
+                checked={formData.allergies?.pollen || false}
                 onChange={onChange}
                 name="allergies.pollen"
               />
@@ -98,7 +105,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.allergies.dust}
+                checked={formData.allergies?.dust || false}
                 onChange={onChange}
                 name="allergies.dust"
               />
@@ -108,7 +115,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.allergies.trees}
+                checked={formData.allergies?.trees || false}
                 onChange={onChange}
                 name="allergies.trees"
               />
@@ -120,7 +127,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.allergies.redDye}
+                checked={formData.allergies?.redDye || false}
                 onChange={onChange}
                 name="allergies.redDye"
               />
@@ -130,7 +137,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.allergies.grass}
+                checked={formData.allergies?.grass || false}
                 onChange={onChange}
                 name="allergies.grass"
               />
@@ -140,7 +147,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.allergies.latex}
+                checked={formData.allergies?.latex || false}
                 onChange={onChange}
                 name="allergies.latex"
               />
@@ -152,7 +159,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.allergies.beeStings}
+                checked={formData.allergies?.beeStings || false}
                 onChange={onChange}
                 name="allergies.beeStings"
               />
@@ -162,7 +169,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.allergies.food}
+                checked={formData.allergies?.food || false}
                 onChange={onChange}
                 name="allergies.food"
               />
@@ -172,9 +179,9 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <TextField
             fullWidth
             label="Other"
-            name="allergies.other"
-            value={formData.allergies.other}
+            value={formData.allergies?.other || ''} // Handle undefined other allergies safely
             onChange={onChange}
+            name="allergies.other"
             margin="normal"
           />
         </Grid>
@@ -189,7 +196,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.intolerances.gluten}
+                checked={formData.intolerances?.gluten || false}
                 onChange={onChange}
                 name="intolerances.gluten"
               />
@@ -201,7 +208,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.intolerances.dairy}
+                checked={formData.intolerances?.dairy || false}
                 onChange={onChange}
                 name="intolerances.dairy"
               />
@@ -213,7 +220,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.intolerances.redDye}
+                checked={formData.intolerances?.redDye || false}
                 onChange={onChange}
                 name="intolerances.redDye"
               />
@@ -225,7 +232,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.intolerances.shellfish}
+                checked={formData.intolerances?.shellfish || false}
                 onChange={onChange}
                 name="intolerances.shellfish"
               />
@@ -237,7 +244,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.intolerances.nuts}
+                checked={formData.intolerances?.nuts || false}
                 onChange={onChange}
                 name="intolerances.nuts"
               />
@@ -249,7 +256,7 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.intolerances.eggs}
+                checked={formData.intolerances?.eggs || false}
                 onChange={onChange}
                 name="intolerances.eggs"
               />
@@ -261,9 +268,9 @@ const DrugsOTCStep = ({ formData, onChange, addDrug, removeDrug }) => {
           <TextField
             fullWidth
             label="Others"
-            name="intolerances.others"
-            value={formData.intolerances.others}
+            value={formData.intolerances?.others || ''} // Handle undefined intolerance fields safely
             onChange={onChange}
+            name="intolerances.others"
             margin="normal"
           />
         </Grid>

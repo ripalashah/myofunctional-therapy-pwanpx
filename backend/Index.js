@@ -1,6 +1,7 @@
 // backend/index.js
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config(); // Load environment variables from .env file
 const connectDB = require('./config/db'); // Ensure this points to your DB connection file
@@ -31,7 +32,8 @@ app.use(cors({
 // Middleware to parse incoming JSON and URL-encoded data
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
-
+app.use(bodyParser.json()); // Handles application/json
+app.use(bodyParser.urlencoded({ extended: true })); // Handles URL-encoded bodies
 // Connect to MongoDB using the function from config/db
 connectDB(); 
 

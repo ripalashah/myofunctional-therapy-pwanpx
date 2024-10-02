@@ -15,6 +15,7 @@ import PatientIncentives from './components/PatientIncentives'; // Update to Pat
 import ViewProgress from './components/ViewProgress'; // Update to ViewProgress
 import SleepQuestionnaire from './components/SleepQuestionnaire'; // Ensure this file exists or create it
 import { AuthProvider } from './context/AuthContext'; // Ensure AuthContext path is correct
+import PatientHistory from './components/PatientHistory'; // Import the new component
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/incentives" element={<ProtectedRoute role="patient" component={PatientIncentives} />} /> {/* Corrected name */}
           <Route path="/progress-logs" element={<ProtectedRoute role="therapist" component={ViewProgress} />} /> {/* Corrected name */}
           <Route path="/sleep-questionnaire" element={<ProtectedRoute role="patient" component={SleepQuestionnaire} />} /> {/* Ensure file exists */}
+          <Route path="/patients/:id/history" element={<PatientHistory />} />
         </Routes>
       </Router>
     </AuthProvider>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { TextField, Button, Typography, Box, Paper, Stepper, Step, StepLabel, FormControl, InputLabel, Select, MenuItem, FormHelperText, Alert, Input } from '@mui/material';
+import { TextField, Button, Typography, Box, Paper, Stepper, Step, StepLabel, FormControl, InputLabel, Select, MenuItem, FormHelperText, Alert, Input} from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'; // Import DatePicker from MUI X
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'; // Localization for DatePicker
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'; // Adapter for date-fns
@@ -33,7 +33,7 @@ const CreatePatient = ({ onPatientCreated }) => {
       physician: '',
       lastPhysicalExam: null, // Date as null initially
       chiefComplaint: ''
-    },
+    } ,
     childhoodIllnesses: { measles: false, mumps: false, rubella: false, chickenpox: false, other: '' },
     medicalProblems: {
       prematureBirth: false,
@@ -71,13 +71,14 @@ const CreatePatient = ({ onPatientCreated }) => {
       mouthBreathing: false,
       celiacDisease: false
     },
-    surgeries: [{ year: '', reason: '', hospital: '' }], // Initial empty surgery
-    hospitalizations: [{ year: '', reason: '', hospital: '' }], // Initial empty hospitalization
-    bloodTransfusion: {
-      hadTransfusion: false,
-      explanation: ''
-    },
-    drugs: [{ name: '', strength: '', frequency: '' }],
+    surgeries: [], // Initial empty surgery
+    hospitalizationYear: '',
+    hospitalizationReason: '',
+    hospitalizationHospital: '',
+    bloodTransfusion: '',
+    bloodTransfusionExplanation: '',
+    
+    drugs: [],
     allergies: { drugName: '', reaction: '', pollen: false, dust: false, trees: false, redDye: false, grass: false, latex: false, beeStings: false, food: false, other: '' },
     intolerances: { gluten: false, dairy: false, redDye: false, shellfish: false, nuts: false, eggs: false, others: '' },
     prenatalHistory: {
@@ -85,7 +86,7 @@ const CreatePatient = ({ onPatientCreated }) => {
       complications: '', // Description of complications
       term: '', // 40+ weeks, 39-37 weeks, 36-33 weeks, Other
       laborDelivery: '', // Normal, Induced, C-Section
-      complications: {
+      complicationsDetails: {
         protractedLabor: false,
         forceps: false,
         vacuum: false
@@ -117,12 +118,12 @@ const CreatePatient = ({ onPatientCreated }) => {
       mumbling: false,
     },
     sensorySystem: {
-      light: { type: Boolean, default: false },
-      sound: { type: Boolean, default: false },
-      texture: { type: Boolean, default: false },
-      selfRegulation: { type: Boolean, default: false },
-      hypersensitive: { type: Boolean, default: false },
-      other: { type: String, default: '' },
+      light: false,
+      sound: false,
+      texture: false,
+      selfRegulation: false,
+      hypersensitive: false,
+      other: '',
     },
     sleepingPattern: {
       goodSleeper: { type: Boolean, default: false },
@@ -211,109 +212,169 @@ const CreatePatient = ({ onPatientCreated }) => {
       bitePlate: false,
       satisfiedWithSmile: false,
       smileChange: ''
-    },
-});
+    } 
+}); 
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [activeStep, setActiveStep] = useState(0); // Track the current step
   const [files, setFiles] = useState([]); // File upload state
 
-  const steps = ['Personal Info', 'Childhood Illnesses', 'Medical Problems', 'Surgeries', 'Medications', 'Allergies', 'Dental History'];
+  const steps = ['Personal Info', 'Childhood Illnesses', 'Medical Problems', 'Surgeries', 'Medications', 'Prenatal History', 'Development History', 'Interventions', 
+  'Speech', 
+  'Sensory System', 
+  'Sleeping Pattern', 
+  'Feeding History', 
+  'Oral Habits', 'Dental History', 'Upload Medical Documents'];
 
   const handleNext = () => setActiveStep((prevStep) => prevStep + 1);
   const handleBack = () => setActiveStep((prevStep) => prevStep - 1);
 
-  // Handle form input changes
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
-    if (type === 'checkbox') {
-      setFormData({
-        ...formData,
-        [name.split('.')[0]]: { ...formData[name.split('.')[0]], [name.split('.')[1]]: checked },
+    const nameParts = name.split('.'); // Splitting the name for nested structure
+  
+    setFormData((prevState) => {
+      let updatedData = { ...prevState }; // Create a copy of the current state
+      let nestedField = updatedData;
+  
+      // Traverse through the nested objects based on the split name
+      nameParts.forEach((part, index) => {
+        if (index === nameParts.length - 1) {
+          // Last part of the name, assign the value
+          if (type === 'checkbox') {
+            nestedField[part] = checked; // For checkboxes
+          } else {
+            nestedField[part] = value; // For other input types
+          }
+        } else {
+          // Keep drilling down the object structure
+          nestedField = nestedField[part];
+        }
       });
-    } else {
-      setFormData({
-        ...formData,
-        [name.split('.')[0]]: { ...formData[name.split('.')[0]], [name.split('.')[1]]: value },
-      });
-    }
-  };
-
-  // Handle Date Changes for DatePickers
-  const handleDateChange = (name, date) => {
-    setFormData({
-      ...formData,
-      [name.split('.')[0]]: { ...formData[name.split('.')[0]], [name.split('.')[1]]: date },
+  
+      return updatedData; // Return the updated state
     });
   };
-
+  
+    // Handle Date Changes for DatePickers
+  const handleDateChange = (name, date) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [name.split('.')[0]]: {
+        ...prevData[name.split('.')[0]],
+        [name.split('.')[1]]: date,
+      },
+    }));
+  };
   // Handle file uploads
   const handleFileUpload = (event) => {
     const selectedFiles = Array.from(event.target.files);
-    setFiles([...files, ...selectedFiles]);
+    setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
   };
 
-   // Add surgery
-   const addSurgery = () => {
-    setFormData({
-      ...formData,
-      surgeries: [...formData.surgeries, { year: '', reason: '', hospital: '' }]
-    });
+  // Add or remove surgeries dynamically
+  const addSurgery = () => {
+    setFormData((prevData) => ({
+      ...prevData,
+      surgeries: Array.isArray(prevData.surgeries) 
+      ? [...prevData.surgeries, { year: '', reason: '', hospital: '' }] 
+      : [{ year: '', reason: '', hospital: '' }]
+    }));
   };
 
-  // Remove surgery
-  const removeSurgery = (index) => {
-    const updatedSurgeries = formData.surgeries.filter((_, i) => i !== index);
-    setFormData({
-      ...formData,
+  const handleSurgeryChange = (index, field, value) => {
+    const updatedSurgeries = (formData.surgeries || []).map((surgery, i) =>
+      i === index ? { ...surgery, [field]: value } : surgery
+    );
+    setFormData((prevData) => ({
+      ...prevData,
       surgeries: updatedSurgeries
-    });
+    }));
   };
 
-  // Example for managing the drugs list
+  const removeSurgery = (index) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      surgeries: prevData.surgeries.filter((_, i) => i !== index),
+    }));
+  };
+
+  // Add a new drug entry
   const addDrug = () => {
-    setFormData(prevState => ({
-      ...prevState,
-      drugsOTC: [...prevState.drugsOTC, { name: '', strength: '', frequency: '' }] // Add an empty drug object
+    setFormData((prevData) => ({
+      ...prevData,
+      drugs: Array.isArray(prevData.drugs)
+        ? [...prevData.drugs, { name: '', strength: '', frequency: '' }]
+        : [{ name: '', strength: '', frequency: '' }],
     }));
   };
 
+  // Handle drug value changes
+  const handleDrugChange = (index, field, value) => {
+    const updatedDrugs = (formData.drugs || []).map((drug, i) =>
+      i === index ? { ...drug, [field]: value } : drug
+    );
+    setFormData((prevData) => ({
+      ...prevData,
+      drugs: updatedDrugs,
+    }));
+  };
+
+  // Remove a drug from the list
   const removeDrug = (index) => {
-    setFormData(prevState => ({
-      ...prevState,
-      drugsOTC: prevState.drugsOTC.filter((_, i) => i !== index) // Remove the drug at the specified index
+    setFormData((prevData) => ({
+      ...prevData,
+      drugs: prevData.drugs.filter((_, i) => i !== index),
     }));
   };
+  
+  /// Handle form submission
+const onSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setSuccess('');
 
-  // Handle form submission
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
+  try {
+    // Prepare FormData for submission
+    const formDataToSubmit = new FormData();
+    formDataToSubmit.append('name', formData.personalInfo.name); // Ensure name is passed
+    formDataToSubmit.append('email', formData.personalInfo.email); // Ensure email is passed
+    formDataToSubmit.append('patientData', JSON.stringify(formData));
+    files.forEach((file) => {
+      formDataToSubmit.append('files', file); // Append each file
+    });
 
-    try {
-      // Submit formData and files via Axios
-      const formDataToSubmit = new FormData();
-      formDataToSubmit.append('patientData', JSON.stringify(formData));
-      files.forEach((file) => {
-        formDataToSubmit.append('files', file);
-      });
+    // Submit the data to the backend using Axios
+    const res = await axios.post('http://localhost:5000/api/patients/create-patient', formDataToSubmit, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`, // Token for authorization
+        'Content-Type': 'multipart/form-data', // Ensure the request has the correct content type
+      },
+    });
 
-      const res = await axios.post('http://localhost:5000/api/patients/create-patient', formDataToSubmit, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // Therapist's token
-        },
-      });
+    // Handle success
+    setSuccess('Patient created successfully');
+    onPatientCreated(res.data); // Pass the new patient data to update the UI
+  } catch (error) {
+    console.error('Error creating patient:', error);
 
-      setSuccess('Patient created successfully');
-      onPatientCreated(res.data); // Pass the new patient data to update the UI
-    } catch (error) {
-      setError('Failed to create patient');
-      console.error('Error creating patient:', error);
+    // Detailed error handling
+    if (error.response && error.response.data) {
+      console.error('Error response data:', error.response.data);
+      console.error('Error response status:', error.response.status);
+      console.error('Error response headers:', error.response.headers);
+      setError(`Failed to create patient: ${error.response.data.message}`);
+    } else {
+      console.error('Error request data:', error.request);
+      setError('An unknown error occurred');
     }
-  };
-
+    
+    console.error('Error creating patient:', error);
+    setError(`Error: ${error.message}`);
+  }
+};
+  
   // Step Content Rendering Logic
   const renderStepContent = (step) => {
     switch (step) {
@@ -329,7 +390,6 @@ const CreatePatient = ({ onPatientCreated }) => {
               required
               margin="normal"
             />
-
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
                 label="Date of Birth"
@@ -338,7 +398,6 @@ const CreatePatient = ({ onPatientCreated }) => {
                 renderInput={(params) => <TextField fullWidth margin="normal" {...params} />}
               />
             </LocalizationProvider>
-
             <FormControl fullWidth margin="normal">
               <InputLabel>Marital Status</InputLabel>
               <Select
@@ -405,9 +464,9 @@ const CreatePatient = ({ onPatientCreated }) => {
       case 2:
         return <MedicalProblemsStep formData={formData} onChange={onChange} />;
       case 3:
-        return <SurgeriesStep formData={formData} onChange={onChange} addSurgery={addSurgery} removeSurgery={removeSurgery} />;
+        return <SurgeriesStep formData={formData} onChange={onChange} addSurgery={addSurgery} removeSurgery={removeSurgery} handleSurgeryChange={handleSurgeryChange}/>;
       case 4:
-        return <DrugsOTCStep formData={formData} onChange={onChange} addDrug={addDrug} removeDrug={removeDrug} />;
+        return <DrugsOTCStep formData={formData} onChange={onChange} addDrug={addDrug} removeDrug={removeDrug} handleDrugChange={handleDrugChange} />;
       case 5:
         return <PrenatalHistoryStep formData={formData} onChange={onChange} />;
       case 6:
@@ -417,7 +476,7 @@ const CreatePatient = ({ onPatientCreated }) => {
       case 8:
         return <SpeechStep formData={formData} onChange={onChange} />;
       case 9:
-        return <SensorySystemStep formData={formData} onChange={onChange} />;
+        return <SensorySystemStep formData={formData} onChange={onChange} setFormData={setFormData} />;
       case 10:
         return <SleepingPatternStep formData={formData} onChange={onChange} />;
       case 11:
@@ -426,37 +485,13 @@ const CreatePatient = ({ onPatientCreated }) => {
         return <OralHabitsStep formData={formData} onChange={onChange} />;
       case 13:
         return <DentalHistoryStep formData={formData} onChange={onChange} />;
-      
-        // return (
-        //   <>
-        //     <TextField
-        //       fullWidth
-        //       name="dentalHistory.dentistName"
-        //       label="Dentist Name"
-        //       value={formData.dentalHistory.dentistName}
-        //       onChange={onChange}
-        //       margin="normal"
-        //     />
-        //     <LocalizationProvider dateAdapter={AdapterDateFns}>
-        //       <DatePicker
-        //         label="Last Visit"
-        //         value={formData.dentalHistory.lastVisit}
-        //         onChange={(date) => handleDateChange('dentalHistory.lastVisit', date)}
-        //         renderInput={(params) => <TextField fullWidth margin="normal" {...params} />}
-        //       />
-        //     </LocalizationProvider>
-        //   </>
-        // );
-      
-      // case 7:
-      //   return (
-      //     <>
-      //       <Typography variant="h6" gutterBottom>
-      //         Upload Medical Documents
-      //       </Typography>
-      //       <Input type="file" multiple onChange={handleFileUpload} />
-      //     </>
-      //   );
+      case 14:
+        return (
+          <>
+            <Typography variant="h6">Upload Medical Documents</Typography>
+            <Input type="file" multiple onChange={handleFileUpload} /> {/* Use handleFileUpload */}
+          </>
+        );
       default:
         return null;
     }
@@ -501,3 +536,4 @@ const CreatePatient = ({ onPatientCreated }) => {
 };
 
 export default CreatePatient;
+

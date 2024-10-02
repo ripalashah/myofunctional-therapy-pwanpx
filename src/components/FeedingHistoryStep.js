@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox, FormControlLabel, TextField, Radio, RadioGroup, FormControl, FormLabel, Box, Typography } from '@mui/material';
+import { Checkbox, FormControlLabel, TextField, Radio, RadioGroup, FormLabel, Box, Typography } from '@mui/material';
 
 const FeedingHistoryStep = ({ formData, onChange }) => {
   return (
