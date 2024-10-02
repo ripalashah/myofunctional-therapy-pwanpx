@@ -5,21 +5,21 @@ import { CircularProgress, Typography, List, ListItem, ListItemText, Paper } fro
 
 const PatientHistory = () => {
   const { id } = useParams();
-  const [patient, setPatient] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [patient, setPatient] = useState(null);  // State to hold patient data
+  const [loading, setLoading] = useState(true);  // Loading state
+  const [error, setError] = useState(null);      // Error state
 
   useEffect(() => {
     const fetchPatientHistory = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/patients/${id}`, {
+        const response = await axios.get(`http://localhost:5000/api/patients/${id}/history`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`, // Include token if required
+            Authorization: `Bearer ${localStorage.getItem('token')}`,  // Authorization header
           },
         });
-        setPatient(response.data);
+        setPatient(response.data);  // Set patient data
       } catch (error) {
-        console.error(error); // Log detailed error
+        console.error('Error fetching patient history:', error);
         setError('Error fetching patient history.');
       } finally {
         setLoading(false);
@@ -29,8 +29,13 @@ const PatientHistory = () => {
     fetchPatientHistory();
   }, [id]);
 
-  if (loading) return <CircularProgress />; // Show loading spinner
-  if (error) return <Typography color="error">{error}</Typography>; // Show error message
+  if (loading) {
+    return <CircularProgress />;  // Show loading spinner
+  }
+
+  if (error) {
+    return <Typography color="error">{error}</Typography>;  // Show error message
+  }
 
   return (
     <Paper elevation={3} sx={{ p: 3 }}>
@@ -40,6 +45,7 @@ const PatientHistory = () => {
       <Typography variant="h6" gutterBottom>
         Email: {patient?.userId?.email}
       </Typography>
+
       <Typography variant="h6" gutterBottom>
         Medical History:
       </Typography>
