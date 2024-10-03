@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, List, ListItem, ListItemText, Typography } from '@mui/material';
+import { Button, List, ListItem, ListItemText, Typography, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 const PatientList = () => {
@@ -29,6 +29,28 @@ const PatientList = () => {
     fetchPatients();
   }, []);
 
+  const handleDelete = async (patientId) => {
+    const confirmation = window.confirm('Are you sure you want to delete this patient?');
+    if (!confirmation) return;
+
+    try {
+      const res = await axios.delete(`http://localhost:5000/api/patients/${patientId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`, // Authorization token
+        },
+      });
+
+      if (res.status === 200) {
+        alert('Patient deleted successfully');
+        // Refresh patient list after deletion
+        setPatients((prevPatients) => prevPatients.filter((patient) => patient._id !== patientId));
+      }
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+      alert('Failed to delete patient.');
+    }
+  };
+
   if (loading) {
     return <Typography>Loading...</Typography>;
   }
@@ -46,9 +68,14 @@ const PatientList = () => {
               primary={patient.name}
               secondary={`Email: ${patient.email} | Contact: ${patient.contact || 'N/A'} | Linked User Email: ${patient.userId?.email || 'N/A'}`}
             />
-            <Button variant="contained" color="primary" component={Link} to={`/patients/${patient._id}/history`}>
-              View History
-            </Button>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button variant="contained" color="primary" component={Link} to={`/patients/${patient._id}/history`}>
+                View History
+              </Button>
+              <Button variant="contained" color="secondary" onClick={() => handleDelete(patient._id)}>
+                Delete
+              </Button>
+            </Box>
           </ListItem>
         ))
       ) : (

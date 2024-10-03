@@ -11,12 +11,9 @@ const upload = multer({ dest: 'uploads/' }); // Files will be stored in the 'upl
 
 // Route to create a new patient
 router.post('/create-patient', auth, upload.array('files'), async (req, res) => {
-  console.log("Request body:", req.body);
-  console.log("Uploaded files:", req.files); // Log the uploaded files
-
   try {
     const patientData = JSON.parse(req.body.patientData);
-    const { personalInfo } = patientData; 
+    const { personalInfo, medicalHistory, hipaaConsent } = patientData;  // Declare and use medicalHistory
     const { name, email } = personalInfo;
 
     // Ensure name and email exist
@@ -26,42 +23,55 @@ router.post('/create-patient', auth, upload.array('files'), async (req, res) => 
 
     // Check if a user with this email already exists
     let user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ error: 'User with this email already exists' });
+    if (!user) {
+      user = new User({
+        name,
+        email,
+        password: 'defaultPassword123',  // Set up a secure password
+        role: 'patient',
+      });
+      await user.save();
     }
 
-    // Create a new user for the patient
-    const newUser = new User({
-      name,
-      email,
-      password: 'defaultPassword123', 
-      role: 'patient',
-    });
-    await newUser.save();
-
-    // Create a new patient with the detailed medical history
+    // Create a new patient with medical history and HIPAA consent
     const newPatient = new Patient({
-      ...personalInfo, 
-      medicalHistory: patientData.medicalHistory,
-      therapistId: req.user.id, 
-      userId: newUser._id, 
+      ...personalInfo,  // Spread the personal info
+      medicalHistory: patientData.medicalHistory,  // Use the medical history field here
+      hipaaConsent: patientData.hipaaConsent,  // Use the HIPAA consent field here
+      therapistId: req.user.id,  // Therapist ID (from logged-in user)
+      userId: user._id,  // Link to user ID
     });
 
-    await newPatient.save();
-     // Now also submit the HIPAA form during patient creation
-     const hipaaForm = new HIPAAForm({
-      patientId: newPatient._id,
-      signedPrivacyPolicy: req.body.signedPrivacyPolicy,
-      consentForBilling: req.body.consentForBilling,
-      consentForReleaseOfInfo: req.body.consentForReleaseOfInfo,
-      photoVideoRelease: req.body.photoVideoRelease
-    });
-    res.status(201).json(newPatient); 
+    await newPatient.save();  // Save the patient with all fields
+    res.status(201).json(newPatient);  // Return the saved patient data
   } catch (error) {
     console.error('Error creating patient:', error);
     res.status(500).json({ error: 'Failed to create patient' });
   }
 });
+
+// DELETE a patient by ID and associated user
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const patient = await Patient.findById(req.params.id);
+
+    if (!patient) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+
+    // First, delete the associated user
+    await User.findByIdAndDelete(patient.userId);
+
+    // Then, delete the patient
+    await Patient.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ message: 'Patient and associated user deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting patient and user:', error);
+    res.status(500).json({ message: 'Failed to delete patient and associated user' });
+  }
+});
+
 
 // Route to fetch a patient's full history, including session notes, appointments, and forms
 router.get('/:id/history', auth, async (req, res) => {

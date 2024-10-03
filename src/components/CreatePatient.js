@@ -463,6 +463,51 @@ const onSubmit = async (e) => {
               onChange={onChange}
               margin="normal"
             />
+            {/* Add the missing fields here */}
+            <TextField
+              fullWidth
+              name="personalInfo.parentName"
+              label="Parent Name (if applicable)"
+              value={formData.personalInfo.parentName}
+              onChange={onChange}
+              margin="normal"
+            />
+
+            <TextField
+              fullWidth
+              name="personalInfo.occupation"
+              label="Occupation"
+              value={formData.personalInfo.occupation}
+              onChange={onChange}
+              margin="normal"
+            />
+
+            <TextField
+              fullWidth
+              name="personalInfo.physician"
+              label="Physician"
+              value={formData.personalInfo.physician}
+              onChange={onChange}
+              margin="normal"
+            />
+
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="Last Physical Exam"
+                value={formData.personalInfo.lastPhysicalExam}
+                onChange={(date) => handleDateChange('personalInfo.lastPhysicalExam', date)}
+                renderInput={(params) => <TextField fullWidth margin="normal" {...params} />}
+              />
+            </LocalizationProvider>
+
+            <TextField
+              fullWidth
+              name="personalInfo.chiefComplaint"
+              label="Chief Complaint"
+              value={formData.personalInfo.chiefComplaint}
+              onChange={onChange}
+              margin="normal"
+            />
           </>
         );
       case 1:
