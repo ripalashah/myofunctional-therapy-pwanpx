@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { Container, Typography, Grid, Paper, Box } from '@mui/material';
-import CreatePatient from './CreatePatient';
-import CreateExercisePlan from './CreateExercisePlan';
-import ViewProgress from './ViewProgress';
-import ViewResources from './ViewResources';
-import UploadResource from './UploadResource';
-import AppointmentManagement from './AppointmentManagement';
-import PatientList from './PatientList';
-import Layout from './Layout';
+import { Box, Container, Grid, Paper, Typography } from '@mui/material';
+import Layout from './Layout'; // Assuming you have a Layout component
+import PatientList from './PatientList'; // Your component for listing patients
+import CreatePatient from './CreatePatient'; // Your component for creating new patients
+import CreateExercisePlan from './CreateExercisePlan'; // Your component for creating exercise plans
+import ViewProgress from './ViewProgress'; // Your component for viewing progress logs
+import UploadResource from './UploadResource'; // Component for uploading therapist resources
+import ViewResources from './ViewResources'; // Component to view therapist resources
+import AppointmentManagement from './AppointmentManagement'; // Your component for managing appointments
 
-const TherapistDashboard = ({ userRole, patientId }) => {
-  const [patients, setPatients] = useState([]);
+const TherapistDashboard = () => {
+  const [patientId, setPatientId] = useState(null); // Handle patient selection if necessary
+  const userRole = 'therapist'; // Hardcode user role for this context
 
-  // Update patient list when a new patient is created
-  const handlePatientCreated = (newPatient) => {
-    setPatients([...patients, newPatient]);
+  const handlePatientCreated = (newPatientId) => {
+    setPatientId(newPatientId); // Update patientId when a new patient is created
   };
 
   return (
@@ -25,7 +25,6 @@ const TherapistDashboard = ({ userRole, patientId }) => {
             Therapist Dashboard
           </Typography>
           <Grid container spacing={4}>
-
             {/* Patient Management Section */}
             <Grid item xs={12} md={6}>
               <Paper elevation={3} sx={{ p: 3 }}>
@@ -86,7 +85,6 @@ const TherapistDashboard = ({ userRole, patientId }) => {
                 <AppointmentManagement userRole={userRole} />
               </Paper>
             </Grid>
-
           </Grid>
         </Box>
       </Container>

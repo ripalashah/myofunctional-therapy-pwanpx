@@ -74,7 +74,10 @@ const Login = () => {
     <Layout>
       <Container maxWidth="sm">
         <Paper elevation={3} sx={{ padding: 4, marginTop: 4 }}>
-          <Typography variant="h5" gutterBottom>
+        <Typography variant="h5" sx={{ flexGrow: 1, textAlign: 'center' }}>
+                
+              </Typography>
+          <Typography variant="h6" gutterBottom>
             Login
           </Typography>
 

@@ -1,0 +1,356 @@
+E:\HinduTempleofTriStates\HinduTempleofTriStates\HinduTempleofTriStates\Controllers\CashTransactionsController.cs
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using HinduTempleofTriStates.Models;
+using HinduTempleofTriStates.Repositories;
+using HinduTempleofTriStates.Services;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace HinduTempleofTriStates.Controllers
+{
+    [Route("transaction")]
+    public class CashTransactionsController : Controller
+    {
+        private readonly ICashTransactionRepository _transactionRepository;
+        private readonly LedgerService _ledgerService;
+
+        public CashTransactionsController(ICashTransactionRepository transactionRepository, LedgerService ledgerService)
+        {
+            _transactionRepository = transactionRepository;
+            _ledgerService = ledgerService;
+        }
+
+        // GET: CashTransactions
+        [HttpGet]
+        [Route("")]
+        [Route("Index")]
+        public async Task<IActionResult> Index()
+        {
+            var transactions = await _transactionRepository.GetAllCashTransactionsAsync();
+            return View(transactions);
+        }
+
+        // GET: CashTransactions/Create
+        [HttpGet]
+        [Route("Create")]
+        public async Task<IActionResult> Create()
+        {
+            var ledgerAccounts = await _ledgerService.GetAllAccountsAsync();
+            ViewBag.LedgerAccounts = new SelectList(ledgerAccounts, "Id", "AccountName");
+            return View();
+        }
+
+        // POST: CashTransactions/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("Create")]
+        public async Task<IActionResult> Create([Bind("Date,Description,Amount,Type,LedgerAccountId")] CashTransaction transaction)
+        {
+            if (ModelState.IsValid)
+            {
+                transaction.Id = Guid.NewGuid();
+                await _transactionRepository.AddCashTransactionAsync(transaction);
+                return RedirectToAction(nameof(Index));
+            }
+
+            var ledgerAccounts = await _ledgerService.GetAllAccountsAsync();
+            ViewBag.LedgerAccounts = new SelectList(ledgerAccounts, "Id", "AccountName");
+
+            return View(transaction);
+        }
+
+        // GET: CashIncomeExpenses
+        [HttpGet]
+        [Route("IncomeExpenses")]
+        public async Task<IActionResult> IncomeExpenses()
+        {
+            var transactions = await _transactionRepository.GetAllCashTransactionsAsync();
+            var model = new CashIncomeExpensesModel
+            {
+                CashTransactions = transactions.ToList()
+            };
+
+            return View(model);
+        }
+    }
+}
+
+E:\HinduTempleofTriStates\HinduTempleofTriStates\HinduTempleofTriStates\Models\CashIncomeExpensesModel.cs
+
+using System.Collections.Generic;
+using System.Linq;
+
+namespace HinduTempleofTriStates.Models
+{
+    public class CashIncomeExpensesModel
+    {
+        // List of all Cash Transactions
+        public List<CashTransaction> CashTransactions { get; set; } = new List<CashTransaction>();
+
+        // Calculate total income (sum of all income-type transactions)
+        public decimal TotalIncome => CashTransactions
+            .Where(t => t.Type == CashTransactionType.Income)
+            .Sum(t => t.Amount);
+
+        // Calculate total expense (sum of all expense-type transactions)
+        public decimal TotalExpense => CashTransactions
+            .Where(t => t.Type == CashTransactionType.Expense)
+            .Sum(t => t.Amount);
+
+        // Calculate net balance (Total Income - Total Expense)
+        public decimal NetBalance { get; set; }
+    }
+}
+
+E:\HinduTempleofTriStates\HinduTempleofTriStates\HinduTempleofTriStates\Models\CashTransaction.cs
+
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace HinduTempleofTriStates.Models
+{
+    public enum CashTransactionType
+    {
+        Income,
+        Expense
+    }
+
+    public class CashTransaction
+    {
+        [Key]
+        public Guid Id { get; set; }
+
+        [Required]
+        public DateTime Date { get; set; }
+
+        [Required]
+        public required string Description { get; set; }
+
+        [DataType(DataType.Currency)]
+        [Required]
+        public decimal Amount { get; set; } // The amount will represent either income or expense.
+
+        [NotMapped]
+        [DataType(DataType.Currency)]
+        public decimal Income => Type == CashTransactionType.Income ? Amount : 0m;
+
+        [NotMapped]
+        [DataType(DataType.Currency)]
+        public decimal Expense => Type == CashTransactionType.Expense ? Amount : 0m;
+
+        [Required]
+        public CashTransactionType Type { get; set; } // Enum for transaction type (Income or Expense)
+
+        // Foreign Key to LedgerAccount
+        public Guid? LedgerAccountId { get; set; }
+
+        [ForeignKey("LedgerAccountId")]
+        public LedgerAccount? LedgerAccount { get; set; } // Navigation property
+
+        // Constructor for Income/Expense transaction
+        public CashTransaction(DateTime date, string description, decimal amount, CashTransactionType type)
+        {
+            Date = date;
+            Description = description;
+            Amount = amount;
+            Type = type;
+        }
+
+        // Default constructor for EF Core
+        public CashTransaction() { }
+    }
+}
+
+E:\HinduTempleofTriStates\HinduTempleofTriStates\HinduTempleofTriStates\Models\Transaction.cs
+using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace HinduTempleofTriStates.Models
+{
+    public enum TransactionType
+    {
+        Debit,
+        Credit
+    }
+
+    public class Transaction
+    {
+        [Key]
+        public Guid Id { get; set; }
+
+        [Required]
+        public Guid AccountId { get; set; } // Foreign key for the related Account or Fund
+
+        [Required]
+        public Guid LedgerAccountId { get; set; } // Foreign key for LedgerAccount
+
+        [Required]
+        public DateTime Date { get; set; } = DateTime.UtcNow; // Transaction date
+
+        [Required]
+        [Range(0.01, Double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
+        public decimal Amount { get; set; } // Transaction amount
+
+        [Required]
+        [StringLength(200, ErrorMessage = "Description cannot be longer than 200 characters.")]
+        public string Description { get; set; } = string.Empty; // Description of the transaction
+
+        [Required]
+        public TransactionType TransactionType { get; set; } // Type of transaction (Debit or Credit)
+
+        public decimal Debit => TransactionType == TransactionType.Debit ? Amount : 0;
+        public decimal Credit => TransactionType == TransactionType.Credit ? Amount : 0;
+
+        public virtual required LedgerAccount LedgerAccount { get; set; } // Associated ledger account
+
+        public bool Reconciled { get; set; } = false; // Reconciliation status
+        public DateTime? ReconciliationDate { get; set; } // Date of reconciliation, if applicable
+
+        // Metadata for tracking creation and modification
+        [Required]
+        public string CreatedBy { get; set; } = string.Empty;
+
+        [Required]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedAt { get; set; }
+        public TransactionType Type { get; internal set; }
+        public bool IsDeleted { get; internal set; }
+    }
+}
+
+E:\HinduTempleofTriStates\HinduTempleofTriStates\HinduTempleofTriStates\Repositories\CashTransactionRepository.cs
+
+using HinduTempleofTriStates.Models;
+using HinduTempleofTriStates.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace HinduTempleofTriStates.Repositories
+{
+    public class CashTransactionRepository : ICashTransactionRepository
+    {
+        private readonly ApplicationDbContext _context;
+
+        public CashTransactionRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<CashTransaction>> GetAllCashTransactionsAsync()
+        {
+            return await _context.CashTransactions.ToListAsync();
+        }
+
+        public async Task<CashTransaction?> GetCashTransactionByIdAsync(Guid id)
+        {
+            return await _context.CashTransactions.FindAsync(id);
+        }
+
+        public async Task AddCashTransactionAsync(CashTransaction transaction)
+        {
+            _context.CashTransactions.Add(transaction);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateCashTransactionAsync(CashTransaction transaction)
+        {
+            _context.CashTransactions.Update(transaction);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteCashTransactionAsync(Guid id)
+        {
+            var transaction = await _context.CashTransactions.FindAsync(id);
+            if (transaction != null)
+            {
+                _context.CashTransactions.Remove(transaction);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<bool> CashTransactionExistsAsync(Guid id)
+        {
+            return await _context.CashTransactions.AnyAsync(e => e.Id == id);
+        }
+    }
+}
+E:\HinduTempleofTriStates\HinduTempleofTriStates\HinduTempleofTriStates\Repositories\ICashTransactionRepository.cs
+using HinduTempleofTriStates.Models;
+
+public interface ICashTransactionRepository
+{
+    Task<IEnumerable<CashTransaction>> GetAllCashTransactionsAsync();
+    Task<CashTransaction?> GetCashTransactionByIdAsync(Guid id);
+    Task AddCashTransactionAsync(CashTransaction transaction);
+    Task UpdateCashTransactionAsync(CashTransaction transaction);
+    Task DeleteCashTransactionAsync(Guid id);
+    Task<bool> CashTransactionExistsAsync(Guid id);
+}
+
+E:\HinduTempleofTriStates\HinduTempleofTriStates\HinduTempleofTriStates\Services\CashTransactionService.cs
+using HinduTempleofTriStates.Data;
+using HinduTempleofTriStates.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+
+namespace HinduTempleofTriStates.Services
+{
+    public class CashTransactionService : ICashTransactionService
+    {
+        private readonly ApplicationDbContext _context;
+
+        public CashTransactionService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<List<CashTransaction>> GetAllCashTransactionsAsync()
+        {
+            return await _context.CashTransactions.ToListAsync();
+        }
+
+        internal Task AddCashTransactionAsync(CashTransaction cashTransaction)
+        {
+            throw new NotImplementedException();
+        }
+
+        // Add more service methods as needed
+    }
+    namespace HinduTempleofTriStates.Services
+    {
+        public class CashTransactionService
+        {
+            private readonly ApplicationDbContext _context;
+
+            public CashTransactionService(ApplicationDbContext context)
+            {
+                _context = context;
+            }
+
+            public async Task AddCashTransactionAsync(CashTransaction cashTransaction)
+            {
+                _context.CashTransactions.Add(cashTransaction);
+                await _context.SaveChangesAsync();
+            }
+        }
+    }
+
+
+    public interface ICashTransactionService
+    {
+        Task<List<CashTransaction>> GetAllCashTransactionsAsync();
+        // Add method signatures as needed
+    }
+}
+
+
