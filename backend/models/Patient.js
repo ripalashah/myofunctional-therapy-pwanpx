@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const MedicalHistorySchema = require('./MedicalHistory'); // Import the MedicalHistorySchema
+const Form = require('./Form'); // Ensure Form model is imported
 
 const PatientSchema = new mongoose.Schema({
   name: { type: String, required: true },
