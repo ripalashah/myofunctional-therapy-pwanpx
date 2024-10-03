@@ -17,7 +17,7 @@ router.post('/create-patient', auth, upload.array('files'), async (req, res) => 
     const { name, email } = personalInfo;
 
     // Ensure name and email exist
-    if (!name || !email) {
+    if (!personalInfo.name || !personalInfo.email)  {
       return res.status(400).json({ error: 'Name and email are required.' });
     }
 
@@ -36,10 +36,9 @@ router.post('/create-patient', auth, upload.array('files'), async (req, res) => 
     // Create a new patient with medical history and HIPAA consent
     const newPatient = new Patient({
       ...personalInfo,  // Spread the personal info
-      medicalHistory: patientData.medicalHistory,  // Use the medical history field here
-      hipaaConsent: patientData.hipaaConsent,  // Use the HIPAA consent field here
+      medicalHistory: medicalHistory,  // Use the medical history field here
+      hipaaConsent: hipaaConsent || false,  // Use the HIPAA consent field here
       therapistId: req.user.id,  // Therapist ID (from logged-in user)
-      userId: user._id,  // Link to user ID
     });
 
     await newPatient.save();  // Save the patient with all fields

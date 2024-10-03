@@ -13,7 +13,14 @@ import PatientHistory from './PatientHistory'; // Component for viewing patient 
 const TherapistDashboard = () => {
   const [selectedPatient, setSelectedPatient] = useState(null); // Track selected patient for viewing history
   const [openHistory, setOpenHistory] = useState(false); // Control modal open/close
+  const [patientId, setPatientId] = useState(null);
 
+  // Function to handle when a new patient is created
+  const handlePatientCreated = (newPatientId) => {
+    setPatientId(newPatientId); // Set the newly created patient ID
+    console.log('Patient created successfully with ID:', newPatientId);
+    // You can add any further logic here, such as updating the patient list, showing a success message, etc.
+  };
   // Function to handle viewing patient history
   const handleViewHistory = (patient) => {
     setSelectedPatient(patient); // Set the patient to view history
@@ -50,6 +57,7 @@ const TherapistDashboard = () => {
                 <Typography variant="h5" component="h2" gutterBottom>
                   New Patient
                 </Typography>
+                <CreatePatient onPatientCreated={handlePatientCreated} /> {/* Pass the function here */}
                 <CreatePatient />
               </Paper>
             </Grid>
@@ -60,6 +68,7 @@ const TherapistDashboard = () => {
                 <Typography variant="h5" component="h2" gutterBottom>
                   Exercise Plan
                 </Typography>
+                <CreateExercisePlan patientId={patientId} />
                 <CreateExercisePlan />
               </Paper>
             </Grid>
