@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button, List, ListItem, ListItemText, Typography, Box } from '@mui/material';
-import { Link } from 'react-router-dom';
 
-const PatientList = () => {
+const PatientList = ({ onViewHistory }) => {
   const [patients, setPatients] = useState([]);  // State to hold patients
   const [error, setError] = useState('');        // State to hold errors
   const [loading, setLoading] = useState(true);  // Loading state
@@ -69,7 +68,8 @@ const PatientList = () => {
               secondary={`Email: ${patient.email} | Contact: ${patient.contact || 'N/A'} | Linked User Email: ${patient.userId?.email || 'N/A'}`}
             />
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button variant="contained" color="primary" component={Link} to={`/patients/${patient._id}/history`}>
+              {/* This button triggers the onViewHistory callback, passing the selected patient */}
+              <Button variant="contained" color="primary" onClick={() => onViewHistory(patient)}>
                 View History
               </Button>
               <Button variant="contained" color="secondary" onClick={() => handleDelete(patient._id)}>

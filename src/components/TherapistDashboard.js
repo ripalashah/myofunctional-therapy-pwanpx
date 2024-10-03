@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Container, Grid, Paper, Typography } from '@mui/material';
+import { Box, Container, Grid, Paper, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import Layout from './Layout'; // Assuming you have a Layout component
 import PatientList from './PatientList'; // Your component for listing patients
 import CreatePatient from './CreatePatient'; // Your component for creating new patients
@@ -8,13 +8,28 @@ import ViewProgress from './ViewProgress'; // Your component for viewing progres
 import UploadResource from './UploadResource'; // Component for uploading therapist resources
 import ViewResources from './ViewResources'; // Component to view therapist resources
 import AppointmentManagement from './AppointmentManagement'; // Your component for managing appointments
+import PatientHistory from './PatientHistory'; // Component for viewing patient history
 
 const TherapistDashboard = () => {
   const [patientId, setPatientId] = useState(null); // Handle patient selection if necessary
+  const [selectedPatient, setSelectedPatient] = useState(null); // Track selected patient for history modal
+  const [openHistory, setOpenHistory] = useState(false); // Control modal open/close
   const userRole = 'therapist'; // Hardcode user role for this context
 
   const handlePatientCreated = (newPatientId) => {
     setPatientId(newPatientId); // Update patientId when a new patient is created
+  };
+
+   // Function to handle opening the patient history modal
+   const handleViewHistory = (patient) => {
+    setSelectedPatient(patient); // Set the patient to view history
+    setOpenHistory(true); // Open the modal
+  };
+
+  // Function to handle closing the patient history modal
+  const handleCloseHistory = () => {
+    setOpenHistory(false);
+    setSelectedPatient(null); // Reset selected patient
   };
 
   return (
@@ -31,7 +46,8 @@ const TherapistDashboard = () => {
                 <Typography variant="h5" component="h2" gutterBottom>
                   Patient Management
                 </Typography>
-                <PatientList />
+                {/* Pass the handleViewHistory to the PatientList */}
+                <PatientList onViewHistory={handleViewHistory} />
               </Paper>
             </Grid>
 
@@ -86,6 +102,22 @@ const TherapistDashboard = () => {
               </Paper>
             </Grid>
           </Grid>
+          {/* Dialog for Viewing Patient History */}
+          <Dialog open={openHistory} onClose={handleCloseHistory} fullWidth maxWidth="md">
+            <DialogTitle>Patient History</DialogTitle>
+            <DialogContent>
+              {selectedPatient ? (
+                <PatientHistory patient={selectedPatient} />
+              ) : (
+                <Typography>No patient selected.</Typography>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseHistory} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Box>
       </Container>
     </Layout>
