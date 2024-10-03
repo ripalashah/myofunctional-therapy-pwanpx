@@ -1,40 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import React from 'react';
 import { CircularProgress, Typography, List, ListItem, ListItemText, Paper } from '@mui/material';
 
-const PatientHistory = () => {
-  const { id } = useParams();
-  const [patient, setPatient] = useState(null);  // State to hold patient data
-  const [loading, setLoading] = useState(true);  // Loading state
-  const [error, setError] = useState(null);      // Error state
-
-  useEffect(() => {
-    const fetchPatientHistory = async () => {
-      try {
-        const response = await axios.get(`http://localhost:5000/api/patients/${id}/history`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,  // Authorization header
-          },
-        });
-        setPatient(response.data);  // Set patient data
-      } catch (error) {
-        console.error('Error fetching patient history:', error);
-        setError('Error fetching patient history.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPatientHistory();
-  }, [id]);
-
-  if (loading) {
-    return <CircularProgress />;  // Show loading spinner
-  }
-
-  if (error) {
-    return <Typography color="error">{error}</Typography>;  // Show error message
+const PatientHistory = ({ patient }) => {
+  if (!patient) {
+    return <Typography color="error">No patient selected.</Typography>;  // Handle the case when no patient is passed
   }
 
   return (

@@ -11,22 +11,16 @@ import AppointmentManagement from './AppointmentManagement'; // Your component f
 import PatientHistory from './PatientHistory'; // Component for viewing patient history
 
 const TherapistDashboard = () => {
-  const [patientId, setPatientId] = useState(null); // Handle patient selection if necessary
-  const [selectedPatient, setSelectedPatient] = useState(null); // Track selected patient for history modal
+  const [selectedPatient, setSelectedPatient] = useState(null); // Track selected patient for viewing history
   const [openHistory, setOpenHistory] = useState(false); // Control modal open/close
-  const userRole = 'therapist'; // Hardcode user role for this context
 
-  const handlePatientCreated = (newPatientId) => {
-    setPatientId(newPatientId); // Update patientId when a new patient is created
-  };
-
-   // Function to handle opening the patient history modal
-   const handleViewHistory = (patient) => {
+  // Function to handle viewing patient history
+  const handleViewHistory = (patient) => {
     setSelectedPatient(patient); // Set the patient to view history
     setOpenHistory(true); // Open the modal
   };
 
-  // Function to handle closing the patient history modal
+  // Function to close the patient history modal
   const handleCloseHistory = () => {
     setOpenHistory(false);
     setSelectedPatient(null); // Reset selected patient
@@ -46,8 +40,7 @@ const TherapistDashboard = () => {
                 <Typography variant="h5" component="h2" gutterBottom>
                   Patient Management
                 </Typography>
-                {/* Pass the handleViewHistory to the PatientList */}
-                <PatientList onViewHistory={handleViewHistory} />
+                <PatientList onViewHistory={handleViewHistory} /> {/* Pass the handleViewHistory */}
               </Paper>
             </Grid>
 
@@ -57,7 +50,7 @@ const TherapistDashboard = () => {
                 <Typography variant="h5" component="h2" gutterBottom>
                   New Patient
                 </Typography>
-                <CreatePatient onPatientCreated={handlePatientCreated} />
+                <CreatePatient />
               </Paper>
             </Grid>
 
@@ -67,7 +60,7 @@ const TherapistDashboard = () => {
                 <Typography variant="h5" component="h2" gutterBottom>
                   Exercise Plan
                 </Typography>
-                <CreateExercisePlan patientId={patientId} />
+                <CreateExercisePlan />
               </Paper>
             </Grid>
 
@@ -77,7 +70,7 @@ const TherapistDashboard = () => {
                 <Typography variant="h5" component="h2" gutterBottom>
                   Progress Logs for Patient
                 </Typography>
-                <ViewProgress patientId={patientId} />
+                <ViewProgress />
               </Paper>
             </Grid>
 
@@ -98,11 +91,12 @@ const TherapistDashboard = () => {
                 <Typography variant="h5" component="h2" gutterBottom>
                   Manage Appointments
                 </Typography>
-                <AppointmentManagement userRole={userRole} />
+                <AppointmentManagement />
               </Paper>
             </Grid>
           </Grid>
-          {/* Dialog for Viewing Patient History */}
+
+          {/* Patient History Modal */}
           <Dialog open={openHistory} onClose={handleCloseHistory} fullWidth maxWidth="md">
             <DialogTitle>Patient History</DialogTitle>
             <DialogContent>
