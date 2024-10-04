@@ -1,5 +1,5 @@
 import React from 'react';
-import { CircularProgress, Typography, List, ListItem, ListItemText, Paper } from '@mui/material';
+import { Typography, List, ListItem, ListItemText, Paper } from '@mui/material';
 
 const PatientHistory = ({ patient }) => {
   if (!patient) {

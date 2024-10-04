@@ -21,6 +21,7 @@ const TherapistDashboard = () => {
     console.log('Patient created successfully with ID:', newPatientId);
     // You can add any further logic here, such as updating the patient list, showing a success message, etc.
   };
+
   // Function to handle viewing patient history
   const handleViewHistory = (patient) => {
     setSelectedPatient(patient); // Set the patient to view history
@@ -57,8 +58,7 @@ const TherapistDashboard = () => {
                 <Typography variant="h5" component="h2" gutterBottom>
                   New Patient
                 </Typography>
-                <CreatePatient onPatientCreated={handlePatientCreated} /> {/* Pass the function here */}
-                <CreatePatient />
+                <CreatePatient onPatientCreated={handlePatientCreated} /> {/* Call CreatePatient only once */}
               </Paper>
             </Grid>
 
@@ -68,8 +68,7 @@ const TherapistDashboard = () => {
                 <Typography variant="h5" component="h2" gutterBottom>
                   Exercise Plan
                 </Typography>
-                <CreateExercisePlan patientId={patientId} />
-                <CreateExercisePlan />
+                <CreateExercisePlan patientId={patientId} /> {/* Call CreateExercisePlan only once */}
               </Paper>
             </Grid>
 
