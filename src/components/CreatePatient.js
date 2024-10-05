@@ -17,6 +17,7 @@ import SleepingPatternStep from './SleepingPatternStep';
 import FeedingHistoryStep from './FeedingHistoryStep';
 import OralHabitsStep from './OralHabitsStep';
 import DentalHistoryStep from './DentalHistoryStep';
+import ImmunizationDatesStep from './ImmunizationDatesStep';
 
 const CreatePatient = ({ onPatientCreated }) => {
   const [formData, setFormData] = useState({
@@ -35,6 +36,16 @@ const CreatePatient = ({ onPatientCreated }) => {
       chiefComplaint: ''
     } ,
     childhoodIllnesses: { measles: false, mumps: false, rubella: false, chickenpox: false, other: '' },
+
+    immunizationDates: {
+      tetanus: null,
+      pneumonia: null,
+      hepatitis: null,
+      influenza: null,
+      chickenpox: null,
+      mmr: null
+    },
+    
     medicalProblems: {
       prematureBirth: false,
       feedingDisorder: false,
@@ -226,7 +237,7 @@ const CreatePatient = ({ onPatientCreated }) => {
   const [activeStep, setActiveStep] = useState(0); // Track the current step
   const [files, setFiles] = useState([]); // File upload state
 
-  const steps = ['Personal Info', 'Childhood Illnesses', 'Medical Problems', 'Surgeries', 'Medications', 'Prenatal History', 'Development History', 'Interventions', 
+  const steps = ['Personal Info', 'Childhood Illnesses', 'Immunization Dates', 'Medical Problems', 'Surgeries', 'Medications', 'Prenatal History', 'Development History', 'Interventions', 
   'Speech', 
   'Sensory System', 
   'Sleeping Pattern', 
@@ -512,38 +523,40 @@ const onSubmit = async (e) => {
         );
       case 1:
         return <ChildhoodIllnessesStep formData={formData} onChange={onChange} />;
-      case 2:
-        return <MedicalProblemsStep formData={formData} onChange={onChange} />;
+        case 2:
+        return <ImmunizationDatesStep formData={formData} handleDateChange={handleDateChange} />; // Immunization step
       case 3:
-        return <SurgeriesStep formData={formData} onChange={onChange} addSurgery={addSurgery} removeSurgery={removeSurgery} handleSurgeryChange={handleSurgeryChange}/>;
+        return <MedicalProblemsStep formData={formData} onChange={onChange} />;
       case 4:
-        return <DrugsOTCStep formData={formData} onChange={onChange} addDrug={addDrug} removeDrug={removeDrug} handleDrugChange={handleDrugChange} />;
+        return <SurgeriesStep formData={formData} onChange={onChange} addSurgery={addSurgery} removeSurgery={removeSurgery} handleSurgeryChange={handleSurgeryChange}/>;
       case 5:
-        return <PrenatalHistoryStep formData={formData} onChange={onChange} />;
+        return <DrugsOTCStep formData={formData} onChange={onChange} addDrug={addDrug} removeDrug={removeDrug} handleDrugChange={handleDrugChange} />;
       case 6:
-        return <DevelopmentHistoryStep formData={formData} onChange={onChange} />;
+        return <PrenatalHistoryStep formData={formData} onChange={onChange} />;
       case 7:
-        return <InterventionsStep formData={formData} onChange={onChange} />;
+        return <DevelopmentHistoryStep formData={formData} onChange={onChange} />;
       case 8:
-        return <SpeechStep formData={formData} onChange={onChange} />;
+        return <InterventionsStep formData={formData} onChange={onChange} />;
       case 9:
-        return <SensorySystemStep formData={formData} onChange={onChange} setFormData={setFormData} />;
+        return <SpeechStep formData={formData} onChange={onChange} />;
       case 10:
-        return <SleepingPatternStep formData={formData} onChange={onChange} />;
+        return <SensorySystemStep formData={formData} onChange={onChange} setFormData={setFormData} />;
       case 11:
-        return <FeedingHistoryStep formData={formData} onChange={onChange} />;
+        return <SleepingPatternStep formData={formData} onChange={onChange} />;
       case 12:
-        return <OralHabitsStep formData={formData} onChange={onChange} />;
+        return <FeedingHistoryStep formData={formData} onChange={onChange} />;
       case 13:
-        return <DentalHistoryStep formData={formData} onChange={onChange} />;
+        return <OralHabitsStep formData={formData} onChange={onChange} />;
       case 14:
+        return <DentalHistoryStep formData={formData} onChange={onChange} />;
+      case 15:
         return (
           <>
             <Typography variant="h6">Upload Medical Documents</Typography>
             <Input type="file" multiple onChange={handleFileUpload} /> {/* Use handleFileUpload */}
           </>
         );
-        case 15: // HIPAA consent step
+        case 16: // HIPAA consent step
       return (
         <>
           <Typography variant="h6">HIPAA Consent</Typography>

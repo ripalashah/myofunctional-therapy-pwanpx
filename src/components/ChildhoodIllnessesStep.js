@@ -22,6 +22,21 @@ const ChildhoodIllnessesStep = ({ formData, onChange }) => {
         control={<Checkbox checked={formData.childhoodIllnesses.chickenpox} onChange={onChange} name="childhoodIllnesses.chickenpox" />}
         label="Chickenpox"
       />
+      {/* Add rheumaticFever checkbox */}
+      <FormControlLabel
+        control={<Checkbox name="childhoodIllnesses.rheumaticFever" checked={formData.childhoodIllnesses.rheumaticFever} onChange={onChange}/>}
+        label="Rheumatic Fever"
+      />
+      {/* Add polio checkbox */}
+      <FormControlLabel
+        control={ <Checkbox
+            name="childhoodIllnesses.polio"
+            checked={formData.childhoodIllnesses.polio}
+            onChange={onChange}
+          />
+        }
+        label="Polio"
+      />
       <TextField
         fullWidth
         label="Other Childhood Illnesses"
