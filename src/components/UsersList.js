@@ -8,7 +8,7 @@ const UsersList = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:5002/api/users', {
+                const response = await axios.get('http://localhost:5000/api/users', {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }, // Ensure token is correct if needed
                 });
                 setUsers(response.data);

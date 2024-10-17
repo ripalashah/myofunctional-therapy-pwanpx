@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AppBar, Toolbar, Button, Box, Typography } from '@mui/material';
 import Logo from '../assets/IMG_7145.png'; // Adjust the path to your logo
 
@@ -30,9 +30,8 @@ const Layout = ({ children }) => {
             <img src={Logo} alt="Logo" style={{ height: '40px', marginRight: '10px' }} />
             <Typography
               variant="h6"
-              component={Link}
-              to="/"
-              style={{ color: 'white', textDecoration: 'none' }}
+              onClick={() => navigate('/')}
+              style={{ color: 'white', textDecoration: 'none', cursor: 'pointer' }}
             >
               Welcome to Westchester Myofunctional Specialties Application
             </Typography>
@@ -43,21 +42,21 @@ const Layout = ({ children }) => {
             <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
               {/* Only show the Patient Dashboard link if userRole is "patient" */}
               {userRole === 'patient' && !isPatientDashboard && (
-                <Button color="inherit" component={Link} to="/patient">
+                <Button color="inherit" onClick={() => navigate('/patient')}>
                   Patient Dashboard
                 </Button>
               )}
 
               {/* Only show the Therapist Dashboard link if userRole is "therapist" */}
               {userRole === 'therapist' && !isTherapistDashboard && (
-                <Button color="inherit" component={Link} to="/therapist">
+                <Button color="inherit" onClick={() => navigate('/therapist')}>
                   Therapist Dashboard
                 </Button>
               )}
 
               {/* Only show the Referral Dashboard link if userRole is "referral-source" */}
               {userRole === 'referral-source' && !isReferralDashboard && (
-                <Button color="inherit" component={Link} to="/referral-dashboard">
+                <Button color="inherit" onClick={() => navigate('/referral-dashboard')}>
                   Referral Dashboard
                 </Button>
               )}
@@ -65,12 +64,13 @@ const Layout = ({ children }) => {
               <Button color="inherit" onClick={handleLogout}>
                 Logout
               </Button>
+              <Button color="inherit" onClick={() => navigate('/change-password')}>
+                Change Password
+              </Button>
             </Box>
           ) : (
             <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" sx={{ flexGrow: 1, textAlign: 'center' }}>
-                
-              </Typography>
+              <Typography variant="h6" sx={{ flexGrow: 1, textAlign: 'center' }}></Typography>
             </Box>
           )}
         </Toolbar>

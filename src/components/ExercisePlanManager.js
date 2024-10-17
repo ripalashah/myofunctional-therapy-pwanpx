@@ -9,7 +9,7 @@ const ExercisePlanManager = ({ patientId }) => {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const response = await axios.get(`/api/exercise-plans?patientId=${patientId}`);
+        const response = await axios.get(`http://localhost:3000/api/exercise-plans?patientId=${patientId}`);
         setPlans(response.data);
       } catch (error) {
         console.error('Error fetching exercise plans:', error);

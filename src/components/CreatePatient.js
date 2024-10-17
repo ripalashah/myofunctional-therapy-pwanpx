@@ -35,7 +35,7 @@ const CreatePatient = ({ onPatientCreated }) => {
       lastPhysicalExam: null, // Date as null initially
       chiefComplaint: ''
     } ,
-    childhoodIllnesses: { measles: false, mumps: false, rubella: false, chickenpox: false, other: '' },
+    childhoodIllnesses: { measles: false, mumps: false, rubella: false, chickenpox: false,  rheumaticFever: false, polio: false, other: '' },
 
     immunizationDates: {
       tetanus: null,
@@ -137,9 +137,9 @@ const CreatePatient = ({ onPatientCreated }) => {
       other: '',
     },
     sleepingPattern: {
-      goodSleeper: { type: Boolean, default: false },
-      childSleepConcerns: { type: Boolean, default: false },
-      childSleepExplanation: { type: String, default: '' }, // For further explanation if any concerns
+      goodSleeper: false,
+      childSleepConcerns: false,
+      childSleepExplanation: '', // For further explanation if any concerns
     },
     feedingHistory: {
       infantHistory: {
@@ -361,7 +361,7 @@ const onSubmit = async (e) => {
     files.forEach((file) => {
       formDataToSubmit.append('files', file); // Append each file
     });
-
+    console.log('Sending formData:', formDataToSubmit);
     // Submit the data to the backend using Axios
     const res = await axios.post('http://localhost:5000/api/patients/create-patient', formDataToSubmit, {
       headers: {
@@ -405,17 +405,17 @@ const onSubmit = async (e) => {
               value={formData.personalInfo.name}
               onChange={onChange}
               required
-              margin="normal"
+              margin="dense"
             />
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
                 label="Date of Birth"
                 value={formData.personalInfo.dob}
                 onChange={(date) => handleDateChange('personalInfo.dob', date)}
-                renderInput={(params) => <TextField fullWidth margin="normal" {...params} />}
+                renderInput={(params) => <TextField fullWidth margin="dense" {...params} />}
               />
             </LocalizationProvider>
-            <FormControl fullWidth margin="normal">
+            <FormControl fullWidth margin="dense">
               <InputLabel>Marital Status</InputLabel>
               <Select
                 name="personalInfo.maritalStatus"
@@ -433,7 +433,7 @@ const onSubmit = async (e) => {
               <FormHelperText>Select marital status</FormHelperText>
             </FormControl>
 
-            <FormControl fullWidth margin="normal">
+            <FormControl fullWidth margin="dense">
               <InputLabel>Gender</InputLabel>
               <Select
                 name="personalInfo.gender"
@@ -454,7 +454,7 @@ const onSubmit = async (e) => {
               label="Address"
               value={formData.personalInfo.address}
               onChange={onChange}
-              margin="normal"
+              margin="dense"
             />
 
             <TextField
@@ -463,7 +463,7 @@ const onSubmit = async (e) => {
               label="Phone Number"
               value={formData.personalInfo.phone}
               onChange={onChange}
-              margin="normal"
+              margin="dense"
             />
 
             <TextField
@@ -472,7 +472,7 @@ const onSubmit = async (e) => {
               label="Email Address"
               value={formData.personalInfo.email}
               onChange={onChange}
-              margin="normal"
+              margin="dense"
             />
             {/* Add the missing fields here */}
             <TextField
@@ -481,7 +481,7 @@ const onSubmit = async (e) => {
               label="Parent Name (if applicable)"
               value={formData.personalInfo.parentName}
               onChange={onChange}
-              margin="normal"
+              margin="dense"
             />
 
             <TextField
@@ -490,7 +490,7 @@ const onSubmit = async (e) => {
               label="Occupation"
               value={formData.personalInfo.occupation}
               onChange={onChange}
-              margin="normal"
+              margin="dense"
             />
 
             <TextField
@@ -499,7 +499,7 @@ const onSubmit = async (e) => {
               label="Physician"
               value={formData.personalInfo.physician}
               onChange={onChange}
-              margin="normal"
+              margin="dense"
             />
 
             <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -507,7 +507,7 @@ const onSubmit = async (e) => {
                 label="Last Physical Exam"
                 value={formData.personalInfo.lastPhysicalExam}
                 onChange={(date) => handleDateChange('personalInfo.lastPhysicalExam', date)}
-                renderInput={(params) => <TextField fullWidth margin="normal" {...params} />}
+                renderInput={(params) => <TextField fullWidth margin="dense" {...params} />}
               />
             </LocalizationProvider>
 
@@ -517,7 +517,7 @@ const onSubmit = async (e) => {
               label="Chief Complaint"
               value={formData.personalInfo.chiefComplaint}
               onChange={onChange}
-              margin="normal"
+              margin="dense"
             />
           </>
         );

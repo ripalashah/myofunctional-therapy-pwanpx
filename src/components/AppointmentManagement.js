@@ -13,8 +13,8 @@ const AppointmentManagement = ({ userRole }) => {
       try {
         const endpoint =
           userRole === 'therapist'
-            ? '/api/appointments/therapist-appointments'
-            : '/api/appointments/patient-appointments';
+            ? 'http://localhost:3000/api/appointments/therapist-appointments'
+            : 'http://localhost:3000/api/appointments/patient-appointments';
         const res = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
@@ -32,7 +32,7 @@ const AppointmentManagement = ({ userRole }) => {
   // Handle appointment cancellation
   const handleCancelAppointment = async (appointmentId) => {
     try {
-      await axios.patch(`/api/appointments/cancel/${appointmentId}`, null, {
+      await axios.patch(`http://localhost:5000/api/appointments/cancel/${appointmentId}`, null, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setAppointments(appointments.filter((appt) => appt._id !== appointmentId));

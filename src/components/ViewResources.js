@@ -9,7 +9,7 @@ const ViewResources = () => {
 
   const fetchResources = useCallback(async () => {
     try {
-      const res = await axios.get(`/api/library/resources`, {
+      const res = await axios.get(`http://localhost:5000/api/library/resources`, {
         params: { search: searchTerm, type: resourceType === 'All' ? '' : resourceType },
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });

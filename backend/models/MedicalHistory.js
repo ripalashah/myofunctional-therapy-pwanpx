@@ -121,8 +121,8 @@ const MedicalHistorySchema = new mongoose.Schema({
         explanation: { type: String }
     },
     drugs: [DrugSchema], // List of drugs using the Drug schema
-    allergies: AllergySchema, // Single allergies object using AllergySchema
-    intolerances: IntoleranceSchema, // Single intolerances object using IntoleranceSchema
+    allergies: [AllergySchema], // Single allergies object using AllergySchema
+    intolerances: [IntoleranceSchema], // Single intolerances object using IntoleranceSchema
     prenatalHistory: {
         history: { type: String }, // Normal, Atypical, Complications
         complications: { type: String }, // Describe complications
@@ -187,12 +187,29 @@ const MedicalHistorySchema = new mongoose.Schema({
         hypersensitive: { type: Boolean, default: false },
         other: { type: String, default: '' },
       },
-            
+      
+      sleepingPattern: {
+        goodSleeper: { type: Boolean, default: false },  // Whether the patient is a good sleeper
+        childSleepConcerns: { type: Boolean, default: false },  // Whether there are concerns about sleep
+        childSleepExplanation: { type: String, default: '' },  // Explanation for any sleep concerns
+      },
+      
       oralHabits: {
         pacifier: {
           duringDay: { type: Boolean, default: false },  // Whether the patient uses a pacifier during the day
           atNight: { type: Boolean, default: false },    // Whether the patient uses a pacifier at night
-          resolvedBy: { type: String },                 // When the pacifier habit was resolved (e.g., age)
+          resolvedBy: { type: String }                 // When the pacifier habit was resolved (e.g., age)
+        },
+        thumbDigit: {
+          duringDay: { type: Boolean, default: false },
+          atNight: { type: Boolean, default: false },
+          resolvedBy: { type: String }
+          },
+        objects: {
+            duringDay: { type: Boolean, default: false },
+            atNight: { type: Boolean, default: false },
+            resolvedBy: { type: String }
+           }
         },
     feedingHistory: {
         infantHistory: {
@@ -251,7 +268,7 @@ const MedicalHistorySchema = new mongoose.Schema({
       lastVisit: { type: Date },
       issues: { type: String },
     }
-  },});
+  },);
   
   module.exports = MedicalHistorySchema;
   

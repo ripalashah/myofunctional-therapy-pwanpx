@@ -16,11 +16,12 @@ import ViewProgress from './components/ViewProgress'; // Update to ViewProgress
 import SleepQuestionnaire from './components/SleepQuestionnaire'; // Ensure this file exists or create it
 import { AuthProvider } from './context/AuthContext'; // Ensure AuthContext path is correct
 import PatientHistory from './components/PatientHistory'; // Import the new component
+import ChangePassword from './components/ChangePassword';
 
 function App() {
   return (
     <AuthProvider>
-      <Router basename="/wmt">
+      <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/login" />} /> {/* Redirect root to login */}
           <Route path="/login" element={<Login />} />
@@ -37,6 +38,7 @@ function App() {
           <Route path="/progress-logs" element={<ProtectedRoute role="therapist" component={ViewProgress} />} /> {/* Corrected name */}
           <Route path="/sleep-questionnaire" element={<ProtectedRoute role="patient" component={SleepQuestionnaire} />} /> {/* Ensure file exists */}
           <Route path="/patients/:id/history" element={<PatientHistory />} />
+          <Route path="/change-password" element={<ChangePassword />} />
         </Routes>
       </Router>
     </AuthProvider>

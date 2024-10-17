@@ -23,7 +23,7 @@ const TherapistDashboard = () => {
   };
 
   // Function to handle viewing patient history
-  const handleViewHistory = (patient) => {
+  const handleViewHistory = async (patient) => {
     setSelectedPatient(patient); // Set the patient to view history
     setOpenHistory(true); // Open the modal
   };

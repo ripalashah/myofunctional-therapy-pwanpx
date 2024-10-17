@@ -25,7 +25,7 @@ const LogProgress = () => {
   const fetchExercisePlan = useCallback(async () => {
     try {
       const res = await axios.get(
-        'http://localhost:5000/api/exercise/patient-plan/your-patient-id',
+        'http://localhost:5000/api/exercise/patient-plan/${patientId}',
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         }

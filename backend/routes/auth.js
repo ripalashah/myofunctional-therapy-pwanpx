@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { getGoogleAuthURL, getGoogleAccessToken } = require('../middleware/googleAuth');
 const { createGoogleCalendarEvent, listGoogleCalendarEvents } = require('../services/googleCalendar');
+const auth = require('../middleware/auth'); // Middleware for authentication
 
 // Route to get Google Authentication URL
 router.get('/google', (req, res) => {
@@ -162,6 +163,38 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     console.error('Error during login:', err.message);
     res.status(500).send('Server error');
+  }
+});
+
+// Password change route
+router.put('/change-password', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id; // Extracted from the auth middleware
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if the current password is correct
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Current password is incorrect' });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+
+    // Save the updated user
+    await user.save();
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

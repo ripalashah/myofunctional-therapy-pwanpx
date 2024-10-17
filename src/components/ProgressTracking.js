@@ -7,7 +7,7 @@ const ProgressTracking = () => {
   useEffect(() => {
     const fetchProgress = async () => {
       try {
-        const res = await axios.get('/api/progress/logs', {
+        const res = await axios.get('http://localhost:5000/api/progress/logs', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setProgressLogs(res.data);

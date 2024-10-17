@@ -21,6 +21,7 @@ import {
   MenuItem,
 } from '@mui/material';
 
+
 const PatientDashboard = ({ patientId }) => {
   const [appointments, setAppointments] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);

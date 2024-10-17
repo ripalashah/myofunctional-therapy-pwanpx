@@ -4,7 +4,7 @@ const auth = require('../middleware/auth'); // Middleware to authenticate users
 const multer = require('multer'); // Import multer for file handling
 const Patient = require('../models/Patient');
 const User = require('../models/User'); // Ensure the User model is imported
-const HIPAAForm = require('../models/HIPAA'); // Import the HIPAAForm model
+const HIPAA = require('../models/HIPAA'); // Import the HIPAAForm model
 
 // Setup multer for file uploads
 const upload = multer({ dest: 'uploads/' }); // Files will be stored in the 'uploads' directory
@@ -16,8 +16,10 @@ router.post('/create-patient', auth, upload.array('files'), async (req, res) => 
     const { personalInfo, medicalHistory, hipaaConsent } = patientData;  // Declare and use medicalHistory
     const { name, email } = personalInfo;
 
+    console.log('Received patient data:', patientData);
+
     // Ensure name and email exist
-    if (!personalInfo.name || !personalInfo.email)  {
+    if (!name || !email)  {
       return res.status(400).json({ error: 'Name and email are required.' });
     }
 
@@ -33,9 +35,13 @@ router.post('/create-patient', auth, upload.array('files'), async (req, res) => 
       await user.save();
     }
 
+    const newHipaa = new HIPAA(hipaaConsent);
+    await newHipaa.save();
+
     // Create a new patient with medical history and HIPAA consent
     const newPatient = new Patient({
-      ...personalInfo,  // Spread the personal info
+      name: personalInfo.name,
+      email: personalInfo.email,  // Spread the personal info
       medicalHistory: medicalHistory,  // Use the medical history field here
       hipaaConsent: hipaaConsent || false,  // Use the HIPAA consent field here
       therapistId: req.user.id,  // Therapist ID (from logged-in user)
@@ -77,6 +83,7 @@ router.get('/:id/history', auth, async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id)
       .populate('userId', 'name email')
+      .populate('therapistId', 'name email') // Fetch therapist info
       .populate('appointments')
       .populate('progressLogs')
       .populate('forms')
