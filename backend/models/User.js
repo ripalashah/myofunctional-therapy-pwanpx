@@ -1,3 +1,4 @@
+// backend/models/User.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -28,6 +29,14 @@ const UserSchema = new mongoose.Schema({
   therapist: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Therapist', // Therapist reference if applicable
+  },
+  resetPasswordToken: {
+    type: String,
+    default: null, // Token for password reset functionality
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null, // Expiry time for password reset token
   },
   createdAt: {
     type: Date,

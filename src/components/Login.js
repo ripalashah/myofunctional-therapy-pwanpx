@@ -1,14 +1,14 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import Layout from './Layout'; // Import Layout component
+import { useNavigate, Link } from 'react-router-dom'; // Import Link for navigation
+import Layout from './Layout';
 import { AuthContext } from '../context/AuthContext';
-import { Container, TextField, Button, Typography, Box, Paper } from '@mui/material'; // Import MUI components
+import { Container, TextField, Button, Typography, Box, Paper } from '@mui/material';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const { login } = useContext(AuthContext); // Use login function from AuthContext
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Handle input changes
@@ -47,7 +47,7 @@ const Login = () => {
           navigate('/referral-dashboard');
           break;
         default:
-          navigate('/'); // Default redirect
+          navigate('/');
           break;
       }
     } catch (error) {
@@ -74,10 +74,7 @@ const Login = () => {
     <Layout>
       <Container maxWidth="sm">
         <Paper elevation={3} sx={{ padding: 4, marginTop: 4 }}>
-        <Typography variant="h5" sx={{ flexGrow: 1, textAlign: 'center' }}>
-                
-              </Typography>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h5" sx={{ flexGrow: 1, textAlign: 'center' }}>
             Login
           </Typography>
 
@@ -111,6 +108,16 @@ const Login = () => {
 
           {/* Display error messages if any */}
           {error && <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>}
+
+          {/* Links for password-related features */}
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
+            <Typography variant="body2">
+              <Link to="/change-password">Change Password</Link>
+            </Typography>
+            <Typography variant="body2">
+              <Link to="/forgot-password">Forgot Password?</Link>
+            </Typography>
+          </Box>
         </Paper>
       </Container>
     </Layout>

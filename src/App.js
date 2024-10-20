@@ -17,6 +17,8 @@ import SleepQuestionnaire from './components/SleepQuestionnaire'; // Ensure this
 import { AuthProvider } from './context/AuthContext'; // Ensure AuthContext path is correct
 import PatientHistory from './components/PatientHistory'; // Import the new component
 import ChangePassword from './components/ChangePassword';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 
 function App() {
   return (
@@ -39,6 +41,8 @@ function App() {
           <Route path="/sleep-questionnaire" element={<ProtectedRoute role="patient" component={SleepQuestionnaire} />} /> {/* Ensure file exists */}
           <Route path="/patients/:id/history" element={<PatientHistory />} />
           <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Routes>
       </Router>
     </AuthProvider>
