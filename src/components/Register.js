@@ -35,10 +35,7 @@ const Register = () => {
 
     try {
       // Make sure the URL points to your running backend server
-      const response = await axios.post(
-        'http://localhost:5000/api/auth/register',
-        formData
-      );
+      await axios.post('http://localhost:5000/api/auth/register', formData);
       console.log('Registration response:', response.data); // Debugging log to verify the response
 
       alert('Registration successful. Please login.');

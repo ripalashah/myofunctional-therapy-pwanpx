@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
-const MedicalHistorySchema = require('./MedicalHistory'); // Import the MedicalHistorySchema
+const MedicalHistorySchema = require('./MedicalHistory');
 
 const PatientSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
   address: { type: String },
   occupation: { type: String },
-  forms: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Form' }],
-  medicalHistory: MedicalHistorySchema,  // Reference the MedicalHistorySchema
+  medicalHistory: MedicalHistorySchema,
   hipaaForm: { type: mongoose.Schema.Types.ObjectId, ref: 'HIPAA' },
   progressLogs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ProgressLog' }],
   appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' }],

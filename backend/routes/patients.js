@@ -35,17 +35,24 @@ router.post('/create-patient', auth, upload.array('files'), async (req, res) => 
       await user.save();
     }
 
-    const newHipaa = new HIPAA(hipaaConsent);
-    await newHipaa.save();
-
-    // Create a new patient with medical history and HIPAA consent
-    const newPatient = new Patient({
-      name: personalInfo.name,
-      email: personalInfo.email,  // Spread the personal info
-      medicalHistory: medicalHistory,  // Use the medical history field here
-      hipaaConsent: hipaaConsent || false,  // Use the HIPAA consent field here
-      therapistId: req.user.id,  // Therapist ID (from logged-in user)
-    });
+     // Check if the HIPAA consent is provided and save it
+     let hipaaForm;
+     if (hipaaConsent) {
+       hipaaForm = new HIPAA(hipaaConsent);
+       await hipaaForm.save();
+     }
+ 
+     // Save the patient data
+     const newPatient = new Patient({
+       name: personalInfo.name,
+       email: personalInfo.email,
+       address: personalInfo.address,
+       occupation: personalInfo.occupation,
+       medicalHistory,
+       hipaaForm: hipaaForm ? hipaaForm._id : null,
+       therapistId: req.user.id,
+       userId: user._id,
+     });
 
     await newPatient.save();  // Save the patient with all fields
     res.status(201).json(newPatient);  // Return the saved patient data
@@ -86,7 +93,6 @@ router.get('/:id/history', auth, async (req, res) => {
       .populate('therapistId', 'name email') // Fetch therapist info
       .populate('appointments')
       .populate('progressLogs')
-      .populate('forms')
       .populate('hipaaForm');  // Add HIPAA form data here
       
     if (!patient) {
