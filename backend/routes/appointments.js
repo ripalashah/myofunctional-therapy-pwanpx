@@ -17,6 +17,7 @@ const checkAccess = (req, res, next) => {
   }
 };
 
+
 // Book a new appointment (Patient)
 router.post('/book', auth, checkAccess, async (req, res) => {
   try {
@@ -51,6 +52,9 @@ router.post('/book', auth, checkAccess, async (req, res) => {
     // Save Google Calendar event ID to appointment for future updates or cancellations
     appointment.googleCalendarEventId = googleEvent.id;
     await appointment.save();
+
+    const events = await listGoogleCalendarEvents();
+    console.log('All Google Calendar events:', events);
 
     res.status(201).json({ message: 'Appointment booked successfully', appointment });
   } catch (error) {

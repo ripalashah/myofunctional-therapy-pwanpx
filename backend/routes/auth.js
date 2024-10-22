@@ -52,12 +52,14 @@ router.post('/register', async (req, res) => {
   const { name, email, password, role } = req.body;
 
   if (!name || !email || !password || !role) {
+    console.log('Missing required fields:', { name, email, password, role });
     return res.status(400).json({ msg: 'All fields are required' });
   }
 
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log('User already exists with email:', email);
       return res.status(400).json({ msg: 'User already exists' });
     }
 
@@ -67,10 +69,18 @@ router.post('/register', async (req, res) => {
     await newUser.save();
 
     if (role === 'therapist') {
-      const newTherapist = new Therapist({ user: newUser._id, email: newUser.email });
-      await newTherapist.save();
-      newUser.therapist = newTherapist._id;
-      await newUser.save();
+      try {
+        const newTherapist = new Therapist({ user: newUser._id, email: newUser.email });
+        await newTherapist.save();
+        newUser.therapist = newTherapist._id;
+        await newUser.save();
+        console.log('Therapist data saved successfully:', newTherapist);
+      } catch (therapistError) {
+        console.error('Error saving therapist data:', therapistError);
+        // Optional: Rollback user creation if therapist creation fails
+        await User.findByIdAndDelete(newUser._id);
+        return res.status(500).json({ error: 'Failed to create therapist data. Registration unsuccessful.' });
+      }
     }
 
     res.status(201).json({ msg: 'User registered successfully', user: newUser });
@@ -80,29 +90,35 @@ router.post('/register', async (req, res) => {
   }
 });
 
+
 // Login route
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
+    console.log('Missing email or password.');
     return res.status(400).json({ msg: 'Please provide both email and password' });
   }
 
   try {
     const user = await User.findOne({ email });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(400).json({ msg: 'Invalid credentials. User not found.' });
+    if (!user) {
+      console.log('User not found:', email);
+      return res.status(400).json({ msg: 'Invalid credentials.' });
     }
 
+    // Compare provided password with hashed password in the database
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ msg: 'Invalid credentials. Password does not match.' });
+      console.log('Invalid password for user:', email);
+      return res.status(400).json({ msg: 'Invalid credentials.' });
     }
 
+    // Generate JWT token
     const payload = { user: { id: user._id, role: user.role } };
-
     jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
       if (err) throw err;
+      console.log('Login successful for user:', email);
       res.json({ token, role: user.role });
     });
   } catch (err) {
