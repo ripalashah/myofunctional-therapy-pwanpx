@@ -1,3 +1,4 @@
+// frontend/src/context/AuthContext.js
 import React, { createContext, useState, useEffect } from 'react';
 
 // Create the AuthContext
@@ -5,6 +6,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Retrieve the user information from local storage or any authentication service
@@ -12,6 +14,7 @@ export const AuthProvider = ({ children }) => {
     if (storedUser) {
       setUser(storedUser);
     }
+    setLoading(false); // Set loading to false after checking localStorage
   }, []);
 
   const login = (userData) => {
@@ -28,9 +31,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('role'); // Remove the role if stored separately
   };
 
+  // Function to check if a user is logged in
+  const isLoggedIn = () => {
+    return !!user && !!localStorage.getItem('token');
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, login, logout, isLoggedIn }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

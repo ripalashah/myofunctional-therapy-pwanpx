@@ -52,35 +52,27 @@ router.post('/register', async (req, res) => {
   const { name, email, password, role } = req.body;
 
   if (!name || !email || !password || !role) {
-    console.log('Missing required fields:', { name, email, password, role });
     return res.status(400).json({ msg: 'All fields are required' });
   }
 
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      console.log('User already exists with email:', email);
       return res.status(400).json({ msg: 'User already exists' });
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Original password:', password);
+    // Hash the password before saving
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
     const newUser = new User({ name, email, password: hashedPassword, role });
-
+    console.log('Hashed password:', hashedPassword);
     await newUser.save();
 
     if (role === 'therapist') {
-      try {
-        const newTherapist = new Therapist({ user: newUser._id, email: newUser.email });
-        await newTherapist.save();
-        newUser.therapist = newTherapist._id;
-        await newUser.save();
-        console.log('Therapist data saved successfully:', newTherapist);
-      } catch (therapistError) {
-        console.error('Error saving therapist data:', therapistError);
-        // Optional: Rollback user creation if therapist creation fails
-        await User.findByIdAndDelete(newUser._id);
-        return res.status(500).json({ error: 'Failed to create therapist data. Registration unsuccessful.' });
-      }
+      const newTherapist = new Therapist({ user: newUser._id, email: newUser.email });
+      await newTherapist.save();
+      newUser.therapist = newTherapist._id;
+      await newUser.save();
     }
 
     res.status(201).json({ msg: 'User registered successfully', user: newUser });
@@ -89,6 +81,7 @@ router.post('/register', async (req, res) => {
     res.status(500).json({ error: 'Registration failed. Please try again.' });
   }
 });
+
 
 
 // Login route
@@ -107,8 +100,17 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ msg: 'Invalid credentials.' });
     }
 
+    console.log('Entered password:', password);
+    console.log('Entered password length:', password.length);
+
+    // Log the hashed password from the database and its length
+    console.log('Hashed password from DB:', user.password);
+    console.log('Hashed password length from DB:', user.password.length);
+
     // Compare provided password with hashed password in the database
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('Password comparison result:', isMatch);
+
     if (!isMatch) {
       console.log('Invalid password for user:', email);
       return res.status(400).json({ msg: 'Invalid credentials.' });
@@ -126,6 +128,8 @@ router.post('/login', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+
 
 // Password change route
 router.put('/change-password', auth, async (req, res) => {
