@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
-const MedicalHistorySchema = require('./MedicalHistory');
 
 const PatientSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
   address: { type: String },
   occupation: { type: String },
-  medicalHistory: MedicalHistorySchema,
+  medicalHistory: { type: mongoose.Schema.Types.ObjectId, ref: 'MedicalHistory' }, 
   hipaaForm: { type: mongoose.Schema.Types.ObjectId, ref: 'HIPAA' },
   progressLogs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ProgressLog' }],
   appointments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' }],
@@ -15,5 +14,4 @@ const PatientSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-const Patient = mongoose.model('Patient', PatientSchema);
-module.exports = Patient;
+module.exports = mongoose.model('Patient', PatientSchema);

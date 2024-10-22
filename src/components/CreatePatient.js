@@ -347,50 +347,36 @@ const CreatePatient = ({ onPatientCreated }) => {
   };
   
   /// Handle form submission
-const onSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setSuccess('');
-
-  try {
-    // Prepare FormData for submission
-    const formDataToSubmit = new FormData();
-    formDataToSubmit.append('name', formData.personalInfo.name); // Ensure name is passed
-    formDataToSubmit.append('email', formData.personalInfo.email); // Ensure email is passed
-    formDataToSubmit.append('patientData', JSON.stringify(formData));
-    files.forEach((file) => {
-      formDataToSubmit.append('files', file); // Append each file
-    });
-    console.log('Sending formData:', formDataToSubmit);
-    // Submit the data to the backend using Axios
-    const res = await axios.post('http://localhost:5000/api/patients/create-patient', formDataToSubmit, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`, // Token for authorization
-        'Content-Type': 'multipart/form-data', // Ensure the request has the correct content type
-      },
-    });
-
-    // Handle success
-    setSuccess('Patient created successfully');
-    onPatientCreated(res.data); // Pass the new patient data to update the UI
-  } catch (error) {
-    console.error('Error creating patient:', error);
-
-    // Detailed error handling
-    if (error.response && error.response.data) {
-      console.error('Error response data:', error.response.data);
-      console.error('Error response status:', error.response.status);
-      console.error('Error response headers:', error.response.headers);
-      setError(`Failed to create patient: ${error.response.data.message}`);
-    } else {
-      console.error('Error request data:', error.request);
-      setError('An unknown error occurred');
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+  
+    try {
+      const formDataToSubmit = new FormData();
+      formDataToSubmit.append('name', formData.personalInfo.name);
+      formDataToSubmit.append('email', formData.personalInfo.email);
+      formDataToSubmit.append('patientData', JSON.stringify(formData));
+      files.forEach((file) => {
+        formDataToSubmit.append('files', file);
+      });
+  
+      console.log('Sending formData:', formDataToSubmit);
+  
+      const res = await axios.post('http://localhost:5000/api/patients/create-patient', formDataToSubmit, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      setSuccess('Patient created successfully');
+      onPatientCreated(res.data);
+    } catch (error) {
+      console.error('Error creating patient:', error);
+      setError(`Failed to create patient: ${error.response?.data?.message || error.message}`);
     }
-    
-    console.error('Error creating patient:', error);
-    setError(`Error: ${error.message}`);
-  }
-};
+  };
   
   // Step Content Rendering Logic
   const renderStepContent = (step) => {

@@ -47,6 +47,7 @@ const DrugSchema = new mongoose.Schema({
     others: { type: String }
   });
 const MedicalHistorySchema = new mongoose.Schema({
+  patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient', required: true },
     personalInfo: {
       name: { type: String, required: true },
       dob: { type: Date, required: true },
@@ -270,5 +271,5 @@ const MedicalHistorySchema = new mongoose.Schema({
     }
   },);
   
-  module.exports = MedicalHistorySchema;
+  module.exports = mongoose.model('MedicalHistory', MedicalHistorySchema);
   

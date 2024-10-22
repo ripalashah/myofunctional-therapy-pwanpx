@@ -19,6 +19,7 @@ const progressRoutes = require('./routes/progress'); // Path to progress-related
 const resourcesRoutes = require('./routes/resources'); // Path to resources-related routes
 const sleepQuestionnaireRoutes = require('./routes/sleepQuestionnaire'); // Import the sleep questionnaire routes
 const hipaaRoutes = require('./routes/hipaa');
+const medicalHistoryRoutes = require('./routes/medicalHistory'); // <-- Import Medical History routes
 
 const app = express();
 
@@ -61,6 +62,8 @@ app.use('/api/progress', progressRoutes); // Handle progress-related requests
 app.use('/api/resources', resourcesRoutes); // Handle resource-related requests
 app.use('/api/sleep-questionnaire', sleepQuestionnaireRoutes); // Add the sleep questionnaire routes
 app.use('/api/hipaa', hipaaRoutes); 
+app.use('/api/medical-history', medicalHistoryRoutes); // <-- Register Medical History routes
+
 
 // Basic root endpoint to confirm server is running
 app.get('/', (req, res) => {

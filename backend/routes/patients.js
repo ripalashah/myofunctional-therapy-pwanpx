@@ -13,13 +13,11 @@ const upload = multer({ dest: 'uploads/' }); // Files will be stored in the 'upl
 router.post('/create-patient', auth, upload.array('files'), async (req, res) => {
   try {
     const patientData = JSON.parse(req.body.patientData);
-    const { personalInfo, medicalHistory, hipaaConsent } = patientData;  // Declare and use medicalHistory
+    const { personalInfo, medicalHistory: medicalHistoryData, hipaaConsent } = patientData;
     const { name, email } = personalInfo;
 
-    console.log('Received patient data:', patientData);
-
     // Ensure name and email exist
-    if (!name || !email)  {
+    if (!name || !email) {
       return res.status(400).json({ error: 'Name and email are required.' });
     }
 
@@ -29,38 +27,50 @@ router.post('/create-patient', auth, upload.array('files'), async (req, res) => 
       user = new User({
         name,
         email,
-        password: 'defaultPassword123',  // Set up a secure password
+        password: 'defaultPassword123',
         role: 'patient',
       });
       await user.save();
     }
 
-     // Check if the HIPAA consent is provided and save it
-     let hipaaForm;
-     if (hipaaConsent) {
-       hipaaForm = new HIPAA(hipaaConsent);
-       await hipaaForm.save();
-     }
- 
-     // Save the patient data
-     const newPatient = new Patient({
-       name: personalInfo.name,
-       email: personalInfo.email,
-       address: personalInfo.address,
-       occupation: personalInfo.occupation,
-       medicalHistory,
-       hipaaForm: hipaaForm ? hipaaForm._id : null,
-       therapistId: req.user.id,
-       userId: user._id,
-     });
+    // Create a new patient
+    const newPatient = new Patient({
+      name,
+      email,
+      address: personalInfo.address,
+      occupation: personalInfo.occupation,
+      therapistId: req.user.id,
+      userId: user._id,
+    });
 
-    await newPatient.save();  // Save the patient with all fields
-    res.status(201).json(newPatient);  // Return the saved patient data
+    await newPatient.save();
+
+    // If medical history is provided, save it
+    if (medicalHistoryData) {
+      const medicalHistory = new MedicalHistory({
+        patientId: newPatient._id,
+        ...medicalHistoryData,
+      });
+      await medicalHistory.save();
+      newPatient.medicalHistory = medicalHistory._id;
+      await newPatient.save();
+    }
+
+    // Handle HIPAA Consent
+    if (hipaaConsent) {
+      const hipaaForm = new HIPAA(hipaaConsent);
+      await hipaaForm.save();
+      newPatient.hipaaForm = hipaaForm._id;
+      await newPatient.save();
+    }
+
+    res.status(201).json(newPatient);
   } catch (error) {
     console.error('Error creating patient:', error);
     res.status(500).json({ error: 'Failed to create patient' });
   }
 });
+
 
 // DELETE a patient by ID and associated user
 router.delete('/:id', auth, async (req, res) => {
@@ -90,11 +100,12 @@ router.get('/:id/history', auth, async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id)
       .populate('userId', 'name email')
-      .populate('therapistId', 'name email') // Fetch therapist info
+      .populate('therapistId', 'name email')
       .populate('appointments')
       .populate('progressLogs')
-      .populate('hipaaForm');  // Add HIPAA form data here
-      
+      .populate('hipaaForm')
+      .populate('medicalHistory'); // Populate the medical history
+
     if (!patient) {
       return res.status(404).json({ error: 'Patient not found' });
     }
@@ -106,23 +117,7 @@ router.get('/:id/history', auth, async (req, res) => {
   }
 });
 
-// Route to update medical history for an existing patient
-router.put('/:id/update-medical-history', auth, async (req, res) => {
-  try {
-    const patient = await Patient.findById(req.params.id);
-    if (!patient) return res.status(404).json({ error: 'Patient not found' });
 
-    const updatedMedicalHistory = req.body.medicalHistory;
-
-    patient.medicalHistory = updatedMedicalHistory;
-    await patient.save();
-
-    res.status(200).json({ message: 'Medical history updated successfully', patient });
-  } catch (error) {
-    console.error('Error updating medical history:', error);
-    res.status(500).json({ error: 'Failed to update medical history' });
-  }
-});
 
 // Route to get all patients for a logged-in therapist
 router.get('/therapist-patients', auth, async (req, res) => {
