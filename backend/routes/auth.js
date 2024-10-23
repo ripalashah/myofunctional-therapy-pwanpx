@@ -48,87 +48,125 @@ router.get('/calendar/list', async (req, res) => {
 });
 
 // Register a new user
+// Register a new user
 router.post('/register', async (req, res) => {
   const { name, email, password, role } = req.body;
 
+  // Validate required fields
   if (!name || !email || !password || !role) {
     return res.status(400).json({ msg: 'All fields are required' });
   }
 
   try {
+    // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ msg: 'User already exists' });
     }
-    console.log('Original password:', password);
-    // Hash the password before saving
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    const newUser = new User({ name, email, password: hashedPassword, role });
-    console.log('Hashed password:', hashedPassword);
+
+    // Create a new user with hashed password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ name, email, password, role });
+
+    // Save the user document
     await newUser.save();
 
+    // If the role is 'therapist', create the corresponding therapist document
     if (role === 'therapist') {
-      const newTherapist = new Therapist({ user: newUser._id, email: newUser.email });
+      // Check if a therapist with the same email already exists
+      const existingTherapist = await Therapist.findOne({ email });
+      if (existingTherapist) {
+        return res.status(400).json({ msg: 'Therapist with this email already exists' });
+      }
+
+      // Create a new therapist document linked to the user
+      const newTherapist = new Therapist({
+        user: newUser._id, // Link to the user ID
+        email: newUser.email, // Set email from the newly created user
+        specialty: 'Default Specialty', // Set default values or allow customization during registration
+        availability: [{ day: 'Monday', startTime: '9:00 AM', endTime: '5:00 PM' }], // Example availability
+      });
+
+      // Save the therapist document
       await newTherapist.save();
+
+      // Update the user to reference the therapist
       newUser.therapist = newTherapist._id;
-      await newUser.save();
+      await newUser.save(); // Save the updated user document
     }
 
+    // Respond with success message
     res.status(201).json({ msg: 'User registered successfully', user: newUser });
   } catch (error) {
-    console.error('Error registering user:', error.message);
+    console.error('Error registering user:', error.message); // Log detailed error
     res.status(500).json({ error: 'Registration failed. Please try again.' });
   }
 });
-
-
 
 // Login route
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
+  // Validate input
   if (!email || !password) {
-    console.log('Missing email or password.');
     return res.status(400).json({ msg: 'Please provide both email and password' });
   }
 
   try {
-    const user = await User.findOne({ email });
+    // Trim and perform case-insensitive search for email
+    const emailTrimmed = email.trim();
+    console.log('Searching for user with email:', emailTrimmed);
+
+    const user = await User.findOne({ email: { $regex: new RegExp(`^${emailTrimmed}$`, 'i') } });
+
+    console.log('User found during login:', user);
+
     if (!user) {
-      console.log('User not found:', email);
-      return res.status(400).json({ msg: 'Invalid credentials.' });
+      return res.status(400).json({ msg: 'Invalid credentials. User not found.' });
     }
 
-    console.log('Entered password:', password);
-    console.log('Entered password length:', password.length);
-
-    // Log the hashed password from the database and its length
-    console.log('Hashed password from DB:', user.password);
-    console.log('Hashed password length from DB:', user.password.length);
-
-    // Compare provided password with hashed password in the database
+    // Compare entered password with the hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     console.log('Password comparison result:', isMatch);
 
     if (!isMatch) {
-      console.log('Invalid password for user:', email);
-      return res.status(400).json({ msg: 'Invalid credentials.' });
+      return res.status(400).json({ msg: 'Invalid credentials. Password does not match.' });
     }
 
-    // Generate JWT token
-    const payload = { user: { id: user._id, role: user.role } };
-    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
-      if (err) throw err;
-      console.log('Login successful for user:', email);
-      res.json({ token, role: user.role });
-    });
+    console.log('User role during login:', user.role);
+
+    // Create JWT payload with user ID and role
+    const payload = {
+      user: {
+        id: user._id,
+        role: user.role,
+      },
+    };
+
+    console.log('Signing JWT token with payload:', payload);
+
+    // Sign the JWT token
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' },
+      (err, token) => {
+        if (err) {
+          console.error('Error signing JWT:', err);
+          throw err;
+        }
+
+        console.log('Generated JWT token:', token);
+
+        // Send the token and role back to the frontend
+        res.json({ token, role: user.role });
+      }
+    );
   } catch (err) {
     console.error('Error during login:', err.message);
     res.status(500).send('Server error');
   }
 });
-
 
 
 // Password change route
