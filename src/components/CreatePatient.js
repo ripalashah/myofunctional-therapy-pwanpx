@@ -349,11 +349,13 @@ const CreatePatient = ({ onPatientCreated }) => {
   /// Handle form submission
   const onSubmit = async (e) => {
     e.preventDefault();
+    console.log('Form submission triggered'); // Add this line
     setError('');
     setSuccess('');
   
     try {
       const formDataToSubmit = new FormData();
+      console.log('Medical history data:', formData.medicalProblems); // Or the relevant field for medical history
       formDataToSubmit.append('name', formData.personalInfo.name);
       formDataToSubmit.append('email', formData.personalInfo.email);
       formDataToSubmit.append('patientData', JSON.stringify(formData));

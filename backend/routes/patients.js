@@ -15,7 +15,7 @@ router.post('/create-patient', auth, upload.array('files'), async (req, res) => 
     const patientData = JSON.parse(req.body.patientData);
     const { personalInfo, medicalHistory: medicalHistoryData, hipaaConsent } = patientData;
     const { name, email } = personalInfo;
-
+    console.log('Medical history data received:', medicalHistoryData);
     // Ensure name and email exist
     if (!name || !email) {
       return res.status(400).json({ error: 'Name and email are required.' });
@@ -44,16 +44,22 @@ router.post('/create-patient', auth, upload.array('files'), async (req, res) => 
     });
 
     await newPatient.save();
-
+    console.log('Saving medical history:', medicalHistoryData);
     // If medical history is provided, save it
     if (medicalHistoryData) {
       const medicalHistory = new MedicalHistory({
         patientId: newPatient._id,
         ...medicalHistoryData,
       });
-      await medicalHistory.save();
-      newPatient.medicalHistory = medicalHistory._id;
-      await newPatient.save();
+      try {
+        await medicalHistory.save();
+        newPatient.medicalHistory = medicalHistory._id;
+        await newPatient.save();
+      } catch (error) {
+        console.error('Error saving medical history:', error);
+        return res.status(500).json({ error: 'Failed to save medical history' });
+      }
+      
     }
 
     // Handle HIPAA Consent
