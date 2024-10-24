@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User'); // Adjust path if needed
 const Therapist = require('../models/Therapist'); // Correctly import the Therapist model
+const Patient = require('../models/Patient'); // Add this import for the Patient model
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { getGoogleAuthURL, getGoogleAccessToken } = require('../middleware/googleAuth');
@@ -48,7 +49,6 @@ router.get('/calendar/list', async (req, res) => {
 });
 
 // Register a new user
-// Register a new user
 router.post('/register', async (req, res) => {
   const { name, email, password, role } = req.body;
 
@@ -66,39 +66,53 @@ router.post('/register', async (req, res) => {
 
     // Create a new user with hashed password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password, role });
+    const newUser = new User({ name, email, password: hashedPassword, role });
 
     // Save the user document
     await newUser.save();
 
-    // If the role is 'therapist', create the corresponding therapist document
-    if (role === 'therapist') {
+    // Role-specific handling
+    if (role === 'patient') {
+      // Create a new Patient entry
+      const newPatient = new Patient({
+        name,
+        email,
+        userId: newUser._id, // Link to the user ID
+      });
+
+      // Save the Patient document
+      await newPatient.save();
+    } else if (role === 'therapist') {
       // Check if a therapist with the same email already exists
       const existingTherapist = await Therapist.findOne({ email });
       if (existingTherapist) {
         return res.status(400).json({ msg: 'Therapist with this email already exists' });
       }
 
-      // Create a new therapist document linked to the user
+      // Create a new Therapist entry linked to the user
       const newTherapist = new Therapist({
         user: newUser._id, // Link to the user ID
-        email: newUser.email, // Set email from the newly created user
-        specialty: 'Default Specialty', // Set default values or allow customization during registration
+        email: newUser.email,
+        specialty: 'Default Specialty', // Example default value
         availability: [{ day: 'Monday', startTime: '9:00 AM', endTime: '5:00 PM' }], // Example availability
       });
 
-      // Save the therapist document
+      // Save the Therapist document
       await newTherapist.save();
 
       // Update the user to reference the therapist
       newUser.therapist = newTherapist._id;
       await newUser.save(); // Save the updated user document
+    } else if (role === 'referral-source') {
+      // Handle referral-source-specific logic if any
+      // Currently, no additional data is being saved, but you can add more logic here if needed
+      console.log('Referral source registered:', newUser.email);
     }
 
     // Respond with success message
     res.status(201).json({ msg: 'User registered successfully', user: newUser });
   } catch (error) {
-    console.error('Error registering user:', error.message); // Log detailed error
+    console.error('Error registering user:', error.message);
     res.status(500).json({ error: 'Registration failed. Please try again.' });
   }
 });
@@ -129,6 +143,7 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     console.log('Password comparison result:', isMatch);
 
+     
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid credentials. Password does not match.' });
     }
@@ -168,36 +183,74 @@ router.post('/login', async (req, res) => {
   }
 });
 
-
 // Password change route
 router.put('/change-password', auth, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     const userId = req.user.id;
+    console.log('User ID from token:', userId);
 
     // Find the user by ID
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      console.log('User not found with ID:', userId);
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
+
+    console.log('Current hashed password in DB:', user.password);
 
     // Check if the current password matches
     const isMatch = await bcrypt.compare(currentPassword, user.password);
+    console.log('Current password comparison result:', isMatch);
     if (!isMatch) {
-      return res.status(400).json({ error: 'Current password is incorrect' });
+      console.log('Current password is incorrect for user:', userId);
+      return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+    }
+
+    // Ensure new password is different from the current password
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      console.log('New password is the same as the current password for user:', userId);
+      return res.status(400).json({ success: false, message: 'New password must be different from the current password' });
     }
 
     // Hash the new password before saving
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
+    const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedNewPassword;
+
+    // Update the passwordChangedAt timestamp
+    user.passwordChangedAt = Date.now();
+
+    // Log the new hashed password before saving
+    console.log('New hashed password to be saved:', hashedNewPassword);
 
     // Save the updated user
     await user.save();
+    console.log('Password changed successfully for user:', userId);
 
-    res.json({ message: 'Password changed successfully' });
+    // Update the corresponding role's database if needed
+    if (user.role === 'patient') {
+      await Patient.findOneAndUpdate(
+        { userId: user._id },
+        { $set: { passwordChangedAt: user.passwordChangedAt } }
+      );
+      console.log('Password change timestamp updated for patient:', userId);
+    } else if (user.role === 'therapist') {
+      await Therapist.findOneAndUpdate(
+        { user: user._id },
+        { $set: { passwordChangedAt: user.passwordChangedAt } }
+      );
+      console.log('Password change timestamp updated for therapist:', userId);
+    } else if (user.role === 'referral-source') {
+      // If there's additional logic for referral-source, you can add it here
+      console.log('Password change for referral source does not require additional updates.');
+    }
+
+    res.json({ success: true, message: 'Password changed successfully' });
   } catch (error) {
     console.error('Error changing password:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import { AuthContext } from '../context/AuthContext';
 import { Container, TextField, Button, Typography, Box, Paper } from '@mui/material';
@@ -112,10 +112,10 @@ const Login = () => {
           {/* Links for password-related features */}
           <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="body2">
-              <Link to="/change-password">Change Password</Link>
+            <Button onClick={() => navigate('/change-password')}>Change Password</Button>
             </Typography>
             <Typography variant="body2">
-              <Link to="/forgot-password">Forgot Password?</Link>
+            <Button onClick={() => navigate('/forgot-password')}>Forgot Password</Button>
             </Typography>
           </Box>
         </Paper>

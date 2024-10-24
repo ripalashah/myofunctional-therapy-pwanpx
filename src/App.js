@@ -28,13 +28,14 @@ function App() {
       <Router>
         <Routes>
           {/* Default redirect to login */}
-          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="*" element={<Navigate to="/login" />} />
           
           {/* Authentication and Registration Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/change-password" element={<ChangePassword />} />
 
           {/* Patient Routes */}
           <Route path="/patient" element={<ProtectedRoute role="patient" component={PatientDashboard} />} />
@@ -56,7 +57,7 @@ function App() {
           {/* Common Routes */}
           <Route path="/patients/:id/history" element={<ProtectedRoute role={["therapist", "patient"]} component={PatientHistory} />} />
           <Route path="/medical-history/:patientId" element={<ProtectedRoute role="therapist" component={MedicalHistory} />} /> {/* <-- New Medical History route */}
-          <Route path="/change-password" element={<ProtectedRoute component={ChangePassword} />} />
+          
         </Routes>
       </Router>
     </AuthProvider>
