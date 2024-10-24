@@ -354,11 +354,16 @@ const CreatePatient = ({ onPatientCreated }) => {
     setSuccess('');
   
     try {
+      console.log('Full formData before submission:', formData);
       const formDataToSubmit = new FormData();
       console.log('Medical history data:', formData.medicalProblems); // Or the relevant field for medical history
       formDataToSubmit.append('name', formData.personalInfo.name);
       formDataToSubmit.append('email', formData.personalInfo.email);
       formDataToSubmit.append('patientData', JSON.stringify(formData));
+
+      // Log the FormData content before sending
+      console.log('FormData content before sending:', formDataToSubmit.get('patientData')); 
+
       files.forEach((file) => {
         formDataToSubmit.append('files', file);
       });

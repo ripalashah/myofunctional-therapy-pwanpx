@@ -15,7 +15,8 @@ router.post('/create-patient', auth, upload.array('files'), async (req, res) => 
     const patientData = JSON.parse(req.body.patientData);
     const { personalInfo, medicalHistory: medicalHistoryData, hipaaConsent } = patientData;
     const { name, email } = personalInfo;
-    console.log('Medical history data received:', medicalHistoryData);
+   console.log('Received patient data:', patientData);
+    console.log('Medical history data received:', medicalProblems); // S
     // Ensure name and email exist
     if (!name || !email) {
       return res.status(400).json({ error: 'Name and email are required.' });
