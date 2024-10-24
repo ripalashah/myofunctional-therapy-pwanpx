@@ -21,6 +21,7 @@ import ChangePassword from './components/ChangePassword';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import MedicalHistory from './components/MedicalHistory'; // <-- Import MedicalHistory component
+import PatientManagement from './components/PatientManagement'; // Import PatientManagement component
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
           
           {/* Therapist Routes */}
           <Route path="/therapist" element={<ProtectedRoute role="therapist" component={TherapistDashboard} />} />
+          <Route path="/patient-management" element={<ProtectedRoute role="therapist" component={PatientManagement} />} /> {/* New Patient Management route */}
           <Route path="/create-patient" element={<ProtectedRoute role="therapist" component={CreatePatient} />} />
           <Route path="/progress-logs" element={<ProtectedRoute role="therapist" component={ViewProgress} />} />
           <Route path="/library" element={<ProtectedRoute role="therapist" component={ResourceLibrary} />} />
@@ -55,7 +57,7 @@ function App() {
           <Route path="/referral-dashboard" element={<ProtectedRoute role="referral-source" component={ReferralDashboard} />} />
 
           {/* Common Routes */}
-          <Route path="/patients/:id/history" element={<ProtectedRoute role={["therapist", "patient"]} component={PatientHistory} />} />
+          <Route path="/patients/:id/history" component={PatientHistory} />
           <Route path="/medical-history/:patientId" element={<ProtectedRoute role="therapist" component={MedicalHistory} />} /> {/* <-- New Medical History route */}
           
         </Routes>

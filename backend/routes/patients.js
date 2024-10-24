@@ -3,8 +3,10 @@ const router = express.Router();
 const auth = require('../middleware/auth'); // Middleware to authenticate users
 const multer = require('multer'); // Import multer for file handling
 const Patient = require('../models/Patient');
+const MedicalHistory = require('../models/MedicalHistory');
 const User = require('../models/User'); // Ensure the User model is imported
 const HIPAA = require('../models/HIPAA'); // Import the HIPAAForm model
+const mongoose = require('mongoose');
 
 // Setup multer for file uploads
 const upload = multer({ dest: 'uploads/' }); // Files will be stored in the 'uploads' directory
@@ -13,60 +15,115 @@ const upload = multer({ dest: 'uploads/' }); // Files will be stored in the 'upl
 router.post('/create-patient', auth, upload.array('files'), async (req, res) => {
   try {
     const patientData = JSON.parse(req.body.patientData);
-    const { personalInfo, medicalHistory: medicalHistoryData, hipaaConsent } = patientData;
-    const { name, email } = personalInfo;
-   console.log('Received patient data:', patientData);
-    console.log('Medical history data received:', medicalProblems); // S
-    // Ensure name and email exist
-    if (!name || !email) {
-      return res.status(400).json({ error: 'Name and email are required.' });
+    const {
+      personalInfo,
+      medicalProblems,
+      childhoodIllnesses,
+      immunizationDates,
+      surgeries,
+      allergies,
+      intolerances,
+      prenatalHistory,
+      developmentalHistory,
+      interventions,
+      speech,
+      sensorySystem,
+      sleepingPattern,
+      feedingHistory,
+      oralHabits,
+      dentalHistory,
+      hipaaConsent,
+    } = patientData;
+
+    console.log('Received patient data:', patientData);
+    console.log('Medical history data received:', medicalProblems);
+
+    // Ensure required fields are present
+    if (!personalInfo || !personalInfo.name || !personalInfo.email || !personalInfo.dob) {
+      return res.status(400).json({
+        error: 'Personal information is incomplete. Name, email, and date of birth are required.',
+      });
     }
 
     // Check if a user with this email already exists
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ email: personalInfo.email });
     if (!user) {
       user = new User({
-        name,
-        email,
-        password: 'defaultPassword123',
+        name: personalInfo.name,
+        email: personalInfo.email,
+        password: 'defaultPassword123', // Placeholder password
         role: 'patient',
       });
       await user.save();
     }
 
-    // Create a new patient
+    // Create a new patient entry
     const newPatient = new Patient({
-      name,
-      email,
+      name: personalInfo.name,
+      email: personalInfo.email,
       address: personalInfo.address,
       occupation: personalInfo.occupation,
       therapistId: req.user.id,
-      userId: user._id,
     });
 
     await newPatient.save();
-    console.log('Saving medical history:', medicalHistoryData);
-    // If medical history is provided, save it
-    if (medicalHistoryData) {
-      const medicalHistory = new MedicalHistory({
-        patientId: newPatient._id,
-        ...medicalHistoryData,
-      });
-      try {
-        await medicalHistory.save();
-        newPatient.medicalHistory = medicalHistory._id;
-        await newPatient.save();
-      } catch (error) {
-        console.error('Error saving medical history:', error);
-        return res.status(500).json({ error: 'Failed to save medical history' });
-      }
-      
-    }
 
-    // Handle HIPAA Consent
+    // Validate and set default values for enum fields
+    const validQualityOfFeeding = ['excellent', 'average', 'difficult', 'limited', 'requireSupplement'];
+    const validCurrentDietQuality = ['good', 'average', 'limited', 'picky', 'restricted'];
+    const validResponseOptions = ['WNL', 'Late Introduction', 'struggle', 'aversive'];
+
+    // Set defaults if values are empty
+    feedingHistory.qualityOfFeeding = validQualityOfFeeding.includes(feedingHistory.qualityOfFeeding)
+      ? feedingHistory.qualityOfFeeding
+      : 'average';
+
+    feedingHistory.currentDietQuality = validCurrentDietQuality.includes(feedingHistory.currentDietQuality)
+      ? feedingHistory.currentDietQuality
+      : 'good';
+
+    // Validate solidFoodIntroduction responses
+    feedingHistory.solidFoodIntroduction = feedingHistory.solidFoodIntroduction.map((food) => ({
+      ...food,
+      response: validResponseOptions.includes(food.response) ? food.response : 'WNL',
+    }));
+
+    // Create MedicalHistory
+    const medicalHistory = new MedicalHistory({
+      patientId: newPatient._id,
+      personalInfo,
+      medicalProblems,
+      childhoodIllnesses,
+      immunizationDates,
+      surgeries,
+      allergies,
+      intolerances,
+      prenatalHistory,
+      developmentalHistory,
+      interventions,
+      speech,
+      sensorySystem,
+      sleepingPattern,
+      feedingHistory,
+      oralHabits,
+      dentalHistory,
+    });
+
+    await medicalHistory.save();
+    console.log('Medical history saved:', medicalHistory);
+
+    // Link the medical history to the patient
+    newPatient.medicalHistory = medicalHistory._id;
+    await newPatient.save();
+
+    // Handle HIPAA consent
     if (hipaaConsent) {
-      const hipaaForm = new HIPAA(hipaaConsent);
+      const hipaaForm = new HIPAA({
+        patientId: newPatient._id,
+        ...hipaaConsent,
+      });
       await hipaaForm.save();
+
       newPatient.hipaaForm = hipaaForm._id;
       await newPatient.save();
     }
@@ -102,16 +159,22 @@ router.delete('/:id', auth, async (req, res) => {
 });
 
 
-// Route to fetch a patient's full history, including session notes, appointments, and forms
+// Route to fetch a patient's full history, including medical history
 router.get('/:id/history', auth, async (req, res) => {
+  const { id } = req.params;
+
+  // Check if the provided ID is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: 'Invalid patient ID format' });
+  }
+
   try {
-    const patient = await Patient.findById(req.params.id)
-      .populate('userId', 'name email')
+    const patient = await Patient.findById(id)
+      .populate('medicalHistory')
       .populate('therapistId', 'name email')
       .populate('appointments')
       .populate('progressLogs')
-      .populate('hipaaForm')
-      .populate('medicalHistory'); // Populate the medical history
+      .populate('hipaaForm');
 
     if (!patient) {
       return res.status(404).json({ error: 'Patient not found' });

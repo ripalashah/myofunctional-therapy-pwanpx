@@ -1,37 +1,41 @@
+// src/components/TherapistDashboard.js
 import React, { useState } from 'react';
-import { Box, Container, Grid, Paper, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import {
+  Box,
+  Container,
+  Grid,
+  Paper,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from '@mui/material';
 import Layout from './Layout'; // Assuming you have a Layout component
-import PatientList from './PatientList'; // Your component for listing patients
-import CreatePatient from './CreatePatient'; // Your component for creating new patients
-import CreateExercisePlan from './CreateExercisePlan'; // Your component for creating exercise plans
-import ViewProgress from './ViewProgress'; // Your component for viewing progress logs
+import PatientList from './PatientList'; // Component for listing patients
+import CreatePatient from './CreatePatient'; // Component for creating new patients
+import CreateExercisePlan from './CreateExercisePlan'; // Component for creating exercise plans
+import ViewProgress from './ViewProgress'; // Component for viewing progress logs
 import UploadResource from './UploadResource'; // Component for uploading therapist resources
 import ViewResources from './ViewResources'; // Component to view therapist resources
-import AppointmentManagement from './AppointmentManagement'; // Your component for managing appointments
+import AppointmentManagement from './AppointmentManagement'; // Component for managing appointments
 import PatientHistory from './PatientHistory'; // Component for viewing patient history
 
 const TherapistDashboard = () => {
-  const [selectedPatient, setSelectedPatient] = useState(null); // Track selected patient for viewing history
+  const [selectedPatientId, setSelectedPatientId] = useState(null); // State for selected patient ID
   const [openHistory, setOpenHistory] = useState(false); // Control modal open/close
-  const [patientId, setPatientId] = useState(null);
 
-  // Function to handle when a new patient is created
-  const handlePatientCreated = (newPatientId) => {
-    setPatientId(newPatientId); // Set the newly created patient ID
-    console.log('Patient created successfully with ID:', newPatientId);
-    // You can add any further logic here, such as updating the patient list, showing a success message, etc.
+  // Handle viewing patient history
+  const handleViewHistory = (patient) => {
+    setSelectedPatientId(patient._id); // Set the selected patient's ID
+    setOpenHistory(true); // Open the history modal
   };
 
-  // Function to handle viewing patient history
-  const handleViewHistory = async (patient) => {
-    setSelectedPatient(patient); // Set the patient to view history
-    setOpenHistory(true); // Open the modal
-  };
-
-  // Function to close the patient history modal
+  // Handle closing the history modal
   const handleCloseHistory = () => {
     setOpenHistory(false);
-    setSelectedPatient(null); // Reset selected patient
+    setSelectedPatientId(null); // Reset selected patient ID
   };
 
   return (
@@ -58,7 +62,7 @@ const TherapistDashboard = () => {
                 <Typography variant="h5" component="h2" gutterBottom>
                   New Patient
                 </Typography>
-                <CreatePatient onPatientCreated={handlePatientCreated} /> {/* Call CreatePatient only once */}
+                <CreatePatient />
               </Paper>
             </Grid>
 
@@ -68,7 +72,7 @@ const TherapistDashboard = () => {
                 <Typography variant="h5" component="h2" gutterBottom>
                   Exercise Plan
                 </Typography>
-                <CreateExercisePlan patientId={patientId} /> {/* Call CreateExercisePlan only once */}
+                <CreateExercisePlan patientId={selectedPatientId} />
               </Paper>
             </Grid>
 
@@ -108,8 +112,8 @@ const TherapistDashboard = () => {
           <Dialog open={openHistory} onClose={handleCloseHistory} fullWidth maxWidth="md">
             <DialogTitle>Patient History</DialogTitle>
             <DialogContent>
-              {selectedPatient ? (
-                <PatientHistory patient={selectedPatient} />
+              {selectedPatientId ? (
+                <PatientHistory patientId={selectedPatientId} onBack={handleCloseHistory} />
               ) : (
                 <Typography>No patient selected.</Typography>
               )}
