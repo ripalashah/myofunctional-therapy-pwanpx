@@ -5,6 +5,7 @@ import axios from 'axios';
 import Layout from './Layout';
 import ProgressChart from './ProgressChart'; // Ensure this is correctly imported
 import PatientIncentives from './PatientIncentives';
+import MedicalHistory from './MedicalHistory';
 import {
   Container,
   Typography,
@@ -20,7 +21,6 @@ import {
   TextField,
   MenuItem,
 } from '@mui/material';
-
 
 const PatientDashboard = ({ patientId }) => {
   const [appointments, setAppointments] = useState([]);
@@ -206,6 +206,13 @@ const PatientDashboard = ({ patientId }) => {
           <PatientIncentives />
         </Box>
 
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h5" component="h2" gutterBottom>
+            Complete Your Medical History
+          </Typography>
+          <MedicalHistory patientId={patientId} onComplete={() => alert('Medical history submitted successfully')} />
+        </Box>
+        
         {/* Appointment Booking Dialog */}
         <Dialog open={openDialog} onClose={closeBookingDialog}>
           <DialogTitle>Book New Appointment</DialogTitle>

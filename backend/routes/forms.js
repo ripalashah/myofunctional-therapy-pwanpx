@@ -44,4 +44,18 @@ router.get('/medical-history/:patientId', auth, async (req, res) => {
     }
 });
 
+// New endpoint for patient medical history submission
+router.post('/patient-medical-history', auth, async (req, res) => {
+    try {
+      const { patientId, medicalHistoryData } = req.body;
+      const newMedicalHistory = new MedicalHistory({ patientId, ...medicalHistoryData });
+      const savedHistory = await newMedicalHistory.save();
+      // Update the patient's record to reference this medical history
+      await Patient.findByIdAndUpdate(patientId, { medicalHistory: savedHistory._id });
+      res.status(201).json({ message: 'Medical History Form submitted successfully', medicalHistory: savedHistory });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to submit Medical History Form' });
+    }
+  });
+
 module.exports = router;

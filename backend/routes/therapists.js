@@ -20,5 +20,26 @@ router.get('/', auth, roleCheck(['admin', 'patient', 'therapist']), async (req, 
     res.status(500).json({ error: 'Failed to fetch therapists' });
   }
 });
+// Get a list of patients with new medical histories for the therapist
+router.get('/new-patients', auth, async (req, res) => {
+  try {
+    const therapistId = req.user.id;
+
+    const patients = await Patient.find({
+      therapistId,
+      medicalHistory: { $exists: true },
+    }).populate('medicalHistory');
+
+    if (!patients || patients.length === 0) {
+      return res.status(404).json({ message: 'No patients found with new medical history' });
+    }
+
+    res.status(200).json(patients);
+  } catch (error) {
+    console.error('Error fetching patients:', error);
+    res.status(500).json({ error: 'Failed to fetch patients' });
+  }
+});
+
 
 module.exports = router;

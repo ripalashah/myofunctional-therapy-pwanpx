@@ -135,7 +135,6 @@ router.post('/create-patient', auth, upload.array('files'), async (req, res) => 
   }
 });
 
-
 // DELETE a patient by ID and associated user
 router.delete('/:id', auth, async (req, res) => {
   try {
@@ -157,7 +156,6 @@ router.delete('/:id', auth, async (req, res) => {
     res.status(500).json({ message: 'Failed to delete patient and associated user' });
   }
 });
-
 
 // Route to fetch a patient's full history, including medical history
 router.get('/:id/history', auth, async (req, res) => {
@@ -186,8 +184,6 @@ router.get('/:id/history', auth, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch patient history' });
   }
 });
-
-
 
 // Route to get all patients for a logged-in therapist
 router.get('/therapist-patients', auth, async (req, res) => {
@@ -257,6 +253,41 @@ router.post('/hipaa', auth, async (req, res) => {
     res.status(201).json({ message: 'HIPAA Form submitted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to submit form' });
+  }
+});
+
+// Route for patients to submit/update their medical history
+router.post('/:id/submit-medical-history', auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patient = await Patient.findById(id);
+
+    if (!patient) {
+      return res.status(404).json({ error: 'Patient not found' });
+    }
+
+    // Check if the authenticated user matches the patient
+    if (req.user.id !== patient.userId.toString()) {
+      return res.status(403).json({ error: 'Unauthorized access' });
+    }
+
+    const medicalHistory = req.body;
+    let newMedicalHistory;
+
+    // Check if the patient already has a medical history
+    if (patient.medicalHistory) {
+      newMedicalHistory = await MedicalHistory.findByIdAndUpdate(patient.medicalHistory, medicalHistory, { new: true });
+    } else {
+      newMedicalHistory = new MedicalHistory({ patientId: id, ...medicalHistory });
+      await newMedicalHistory.save();
+      patient.medicalHistory = newMedicalHistory._id;
+      await patient.save();
+    }
+
+    res.status(201).json(newMedicalHistory);
+  } catch (error) {
+    console.error('Error updating medical history:', error);
+    res.status(500).json({ error: 'Failed to update medical history' });
   }
 });
 

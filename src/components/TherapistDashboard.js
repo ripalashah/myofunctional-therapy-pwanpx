@@ -1,5 +1,6 @@
 // src/components/TherapistDashboard.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   Box,
   Container,
@@ -25,7 +26,23 @@ import PatientHistory from './PatientHistory'; // Component for viewing patient 
 const TherapistDashboard = () => {
   const [selectedPatientId, setSelectedPatientId] = useState(null); // State for selected patient ID
   const [openHistory, setOpenHistory] = useState(false); // Control modal open/close
+  const [newPatients, setNewPatients] = useState([]);
 
+  useEffect(() => {
+    const fetchNewPatients = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/therapists/new-patients', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        });
+        setNewPatients(response.data);
+      } catch (error) {
+        console.error('Error fetching new patients:', error);
+      }
+    };
+    
+    fetchNewPatients();
+  }, []);
+  
   // Handle viewing patient history
   const handleViewHistory = (patient) => {
     setSelectedPatientId(patient._id); // Set the selected patient's ID

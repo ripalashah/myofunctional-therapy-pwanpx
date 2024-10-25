@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { Box, Typography, TextField, Button, Alert } from '@mui/material';
 
-const MedicalHistory = () => {
+const MedicalHistory = ({ patientId, onComplete }) => {
   const { patientId } = useParams();
   const [medicalHistory, setMedicalHistory] = useState({});
   const [error, setError] = useState('');
