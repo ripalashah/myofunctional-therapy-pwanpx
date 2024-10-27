@@ -4,18 +4,16 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { Box, Typography, TextField, Button, Alert } from '@mui/material';
 
-const MedicalHistory = ({ onComplete }) => {
+const MedicalHistory = ({ patientId, onComplete }) => {
   const { patientId } = useParams();
   const [medicalHistory, setMedicalHistory] = useState({});
+  const { patientId: routePatientId } = useParams();
+  const patientId = propPatientId || routePatientId;
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const currentPatientId = patientId || routePatientId;
 
   useEffect(() => {
-    if (!patientId) {
-      setError('Patient ID is missing.');
-      return;
-    }
-
     const fetchMedicalHistory = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/medical-history/${patientId}`, {
@@ -29,7 +27,7 @@ const MedicalHistory = ({ onComplete }) => {
     };
 
     fetchMedicalHistory();
-  }, [patientId]);
+  }, [currentPatientId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,25 +38,30 @@ const MedicalHistory = ({ onComplete }) => {
   };
 
   const handleSubmit = async () => {
+    if (!patientId) {
+      setError('Patient ID is missing. Cannot update medical history.');
+      return;
+    }
+
     try {
-      await axios.put(`http://localhost:5000/api/medical-history/update/${patientId}`, { medicalHistory }, {
+      await axios.put(`http://localhost:5000/api/medical-history/update/${currentPatientId}`, medicalHistory, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setSuccess('Medical history updated successfully.');
-      if (onComplete) onComplete();
     } catch (error) {
       console.error('Error updating medical history:', error);
       setError('Failed to update medical history.');
+      setSuccess('');
     }
   };
 
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Medical History for Patient ID: {patientId || 'Unknown'}
+        Medical History for Patient ID: {patientId}
       </Typography>
-      {error && <Alert severity="error">{error}</Alert>}
-      {success && <Alert severity="success">{success}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
       <TextField
         fullWidth
         label="Chief Complaint"
@@ -67,31 +70,8 @@ const MedicalHistory = ({ onComplete }) => {
         onChange={handleChange}
         margin="normal"
       />
-      <TextField
-        fullWidth
-        label="Past Medical History"
-        name="pastMedicalHistory"
-        value={medicalHistory.pastMedicalHistory || ''}
-        onChange={handleChange}
-        margin="normal"
-      />
-      <TextField
-        fullWidth
-        label="Allergies"
-        name="allergies"
-        value={medicalHistory.allergies || ''}
-        onChange={handleChange}
-        margin="normal"
-      />
-      <TextField
-        fullWidth
-        label="Current Medications"
-        name="currentMedications"
-        value={medicalHistory.currentMedications || ''}
-        onChange={handleChange}
-        margin="normal"
-      />
-      <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ mt: 2 }}>
+      {/* Add more fields as required */}
+      <Button variant="contained" color="primary" onClick={handleSubmit}>
         Update Medical History
       </Button>
     </Box>

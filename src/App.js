@@ -39,7 +39,7 @@ function App() {
           <Route path="/change-password" element={<ChangePassword />} />
 
           {/* Patient Routes */}
-          <Route path="/patient" element={<ProtectedRoute role="patient" component={PatientDashboard} />} />
+          <Route path="/patient/:patientId" element={<ProtectedRoute role="patient" component={PatientDashboard} />} />
           <Route path="/appointments" element={<ProtectedRoute role="patient" component={AppointmentManagement} />} />
           <Route path="/payment" element={<ProtectedRoute role="patient" component={Payment} />} />
           <Route path="/progress" element={<ProtectedRoute role="patient" component={ProgressTracking} />} />

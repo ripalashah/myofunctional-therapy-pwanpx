@@ -73,6 +73,34 @@ const TherapistDashboard = () => {
               </Paper>
             </Grid>
 
+            {/* New Patients Section */}
+            <Grid item xs={12} md={6}>
+              <Paper elevation={3} sx={{ p: 3 }}>
+                <Typography variant="h5" component="h2" gutterBottom>
+                  New Patients
+                </Typography>
+                {newPatients.length > 0 ? (
+                  newPatients.map((patient) => (
+                    <Box key={patient._id} sx={{ mb: 2 }}>
+                      <Typography variant="h6">
+                        {patient.name} ({patient.email})
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleViewHistory(patient)}
+                        sx={{ mt: 1 }}
+                      >
+                        View Patient Details
+                      </Button>
+                    </Box>
+                  ))
+                ) : (
+                  <Typography>No new patients available.</Typography>
+                )}
+              </Paper>
+            </Grid>
+
             {/* Create New Patient Section */}
             <Grid item xs={12} md={6}>
               <Paper elevation={3} sx={{ p: 3 }}>
