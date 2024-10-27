@@ -21,8 +21,10 @@ import {
   TextField,
   MenuItem,
 } from '@mui/material';
+import { useParams } from 'react-router-dom';
 
-const PatientDashboard = ({ patientId }) => {
+const PatientDashboard = () => {
+  const { patientId } = useParams();
   const [appointments, setAppointments] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [newAppointment, setNewAppointment] = useState({ date: '', time: '', therapistId: '' });
@@ -210,7 +212,7 @@ const PatientDashboard = ({ patientId }) => {
           <Typography variant="h5" component="h2" gutterBottom>
             Complete Your Medical History
           </Typography>
-          <MedicalHistory patientId={patientId} onComplete={() => alert('Medical history submitted successfully')} />
+          <MedicalHistory onComplete={() => alert('Medical history submitted successfully')} />
         </Box>
         
         {/* Appointment Booking Dialog */}
